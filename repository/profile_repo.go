@@ -13,7 +13,7 @@ type IProfileRepo interface {
 	CreateProfile(profile model.Profile) error
 	GetProfileByID(id string) (model.Profile, error)
 	GetProfileByAccountId(accountId string) (model.Profile, error)
-	UpdateProfile(profile model.Profile) (model.Profile, error)
+	UpdateProfile(accountId string, update map[string]interface{}) (model.Profile, error)
 }
 
 type profileRepo struct {
@@ -67,11 +67,23 @@ func (r *profileRepo) GetProfileByAccountId(accountId string) (model.Profile, er
 	return profile, nil
 }
 
-func (r *profileRepo) UpdateProfile(profile model.Profile) (model.Profile, error) {
+func (r *profileRepo) UpdateProfile(accountId string, update map[string]interface{}) (model.Profile, error) {
 	collection := r.db.Collection("profiles")
-	_, err := collection.UpdateOne(context.Background(), bson.M{"id": profile.Id}, bson.M{"$set": profile})
+
+	_, err := collection.UpdateOne(
+		context.Background(),
+		bson.M{"id": accountId},
+		bson.M{"$set": update},
+	)
 	if err != nil {
 		return model.Profile{}, err
 	}
-	return profile, nil
+
+	var updatedProfile model.Profile
+	err = collection.FindOne(context.Background(), bson.M{"id": accountId}).Decode(&updatedProfile)
+	if err != nil {
+		return model.Profile{}, err
+	}
+
+	return updatedProfile, nil
 }

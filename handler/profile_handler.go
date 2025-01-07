@@ -72,3 +72,32 @@ func (h *ProfileHandler) GetProfileByAccountID(c *gin.Context) {
 		Data:    profile,
 	})
 }
+
+func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
+	userID := c.MustGet("user_id").(string)
+
+	var reqProfile map[string]interface{}
+	if err := c.ShouldBindJSON(&reqProfile); err != nil {
+		c.JSON(http.StatusBadRequest, dto.Resp{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+	profile, err := h.profileService.UpdateProfile(userID, reqProfile)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.Resp{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Resp{
+		Status:  http.StatusOK,
+		Message: "profile updated success",
+		Data:    profile,
+	})
+}
