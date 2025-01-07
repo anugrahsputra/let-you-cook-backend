@@ -1,0 +1,77 @@
+package repository
+
+import (
+	"context"
+	"errors"
+	"let-you-cook/domain/model"
+
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+)
+
+type IProfileRepo interface {
+	CreateProfile(profile model.Profile) error
+	GetProfileByID(id string) (model.Profile, error)
+	GetProfileByAccountId(accountId string) (model.Profile, error)
+	UpdateProfile(profile model.Profile) (model.Profile, error)
+}
+
+type profileRepo struct {
+	db        *mongo.Database
+	indexRepo *IndexRepo
+}
+
+func NewProfileRepo(db *mongo.Database, indexRepo *IndexRepo) *profileRepo {
+	return &profileRepo{
+		db:        db,
+		indexRepo: indexRepo,
+	}
+}
+
+func (r *profileRepo) CreateProfile(profile model.Profile) error {
+	collection := r.db.Collection("profiles")
+
+	_, err := collection.InsertOne(context.Background(), profile)
+	if err != nil {
+		if mongo.IsDuplicateKeyError(err) {
+			return errors.New("profile already exists")
+		}
+		return err
+	}
+	return nil
+}
+
+func (r *profileRepo) GetProfileByID(id string) (model.Profile, error) {
+	collection := r.db.Collection("profiles")
+	var profile model.Profile
+	err := collection.FindOne(context.Background(), bson.M{"id": id}).Decode(&profile)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return profile, nil
+		}
+		return model.Profile{}, err
+	}
+	return profile, nil
+}
+
+func (r *profileRepo) GetProfileByAccountId(accountId string) (model.Profile, error) {
+	collection := r.db.Collection("profiles")
+	var profile model.Profile
+	err := collection.FindOne(context.Background(), bson.M{"id_account": accountId}).Decode(&profile)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return model.Profile{}, nil
+		}
+		return model.Profile{}, err
+	}
+	return profile, nil
+}
+
+func (r *profileRepo) UpdateProfile(profile model.Profile) (model.Profile, error) {
+	collection := r.db.Collection("profiles")
+	_, err := collection.UpdateOne(context.Background(), bson.M{"id": profile.Id}, bson.M{"$set": profile})
+	if err != nil {
+		return model.Profile{}, err
+	}
+	return profile, nil
+}
