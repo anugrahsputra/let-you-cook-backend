@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"let-you-cook/domain/dto"
 	"let-you-cook/domain/model"
 	"let-you-cook/repository"
@@ -12,6 +13,7 @@ import (
 type ITaskService interface {
 	CreateTask(userId string, task dto.ReqTask) error
 	GetTasks(userId string) ([]model.Task, error)
+	UpdateTask(id string, update map[string]interface{}) (model.Task, error)
 }
 
 type taskService struct {
@@ -61,4 +63,26 @@ func (s *taskService) GetTasks(userId string) ([]model.Task, error) {
 	}
 
 	return tasks, nil
+}
+
+func (s *taskService) UpdateTask(id string, update map[string]interface{}) (model.Task, error) {
+	existingTask, err := s.repo.UpdateTask(id, update)
+	if err != nil {
+		return model.Task{}, err
+	}
+
+	if existingTask.Id == "" {
+		return model.Task{}, errors.New("task not found")
+	}
+
+	update["updated_at"] = int(time.Now().Unix())
+
+	updatedTask, err := s.repo.UpdateTask(existingTask.Id, update)
+
+	if err != nil {
+		return model.Task{}, err
+	}
+
+	return updatedTask, nil
+
 }

@@ -12,6 +12,7 @@ import (
 type ITaskRepo interface {
 	CreateTask(task model.Task) error
 	GetTasks(userId string) ([]model.Task, error)
+	UpdateTask(id string, update map[string]interface{}) (model.Task, error)
 }
 
 type taskRepo struct {
@@ -60,4 +61,20 @@ func (r *taskRepo) GetTasks(userId string) ([]model.Task, error) {
 	}
 
 	return tasks, nil
+}
+
+func (r *taskRepo) UpdateTask(id string, update map[string]interface{}) (model.Task, error) {
+	collection := r.db.Collection("tasks")
+
+	_, err := collection.UpdateOne(context.Background(), bson.M{"id": id}, bson.M{"$set": update})
+	if err != nil {
+		return model.Task{}, err
+	}
+
+	var updatedTask model.Task
+	if err = collection.FindOne(context.Background(), bson.M{"id": id}).Decode(&updatedTask); err != nil {
+		return model.Task{}, err
+	}
+
+	return updatedTask, nil
 }

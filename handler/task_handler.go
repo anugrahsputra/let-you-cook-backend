@@ -67,3 +67,44 @@ func (h *TaskHandler) GetTasks(c *gin.Context) {
 	})
 
 }
+
+func (h *TaskHandler) UpdateTask(c *gin.Context) {
+	id := c.Param("id")
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, dto.Resp{
+			Status:  http.StatusBadRequest,
+			Message: "id is required",
+			Data:    nil,
+		})
+		return
+	}
+
+	var reqTask map[string]interface{}
+
+	if err := c.ShouldBindJSON(&reqTask); err != nil {
+		c.JSON(http.StatusBadRequest, dto.Resp{
+			Status:  http.StatusBadRequest,
+			Message: err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	task, err := h.taskService.UpdateTask(id, reqTask)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.Resp{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Resp{
+		Status:  http.StatusOK,
+		Message: "task updated success",
+		Data:    task,
+	})
+
+}

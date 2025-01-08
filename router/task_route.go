@@ -12,5 +12,6 @@ func TaskRoute(r *gin.RouterGroup, taskHandler *handler.TaskHandler) {
 	{
 		taskRoutes.POST("", taskHandler.CreateTask)
 		taskRoutes.GET("", taskHandler.GetTasks)
+		taskRoutes.PUT("/:id", taskHandler.UpdateTask)
 	}
 }
