@@ -12,8 +12,8 @@ import (
 type IProfileRepo interface {
 	CreateProfile(profile model.Profile) error
 	GetProfileByID(id string) (model.Profile, error)
-	GetProfileByAccountId(accountId string) (model.Profile, error)
-	UpdateProfile(accountId string, update map[string]interface{}) (model.Profile, error)
+	GetProfileByAccountId(userId string) (model.Profile, error)
+	UpdateProfile(userId string, update map[string]interface{}) (model.Profile, error)
 }
 
 type profileRepo struct {
@@ -54,10 +54,10 @@ func (r *profileRepo) GetProfileByID(id string) (model.Profile, error) {
 	return profile, nil
 }
 
-func (r *profileRepo) GetProfileByAccountId(accountId string) (model.Profile, error) {
+func (r *profileRepo) GetProfileByAccountId(userId string) (model.Profile, error) {
 	collection := r.db.Collection("profiles")
 	var profile model.Profile
-	err := collection.FindOne(context.Background(), bson.M{"id_account": accountId}).Decode(&profile)
+	err := collection.FindOne(context.Background(), bson.M{"user_id": userId}).Decode(&profile)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return model.Profile{}, nil
@@ -67,12 +67,12 @@ func (r *profileRepo) GetProfileByAccountId(accountId string) (model.Profile, er
 	return profile, nil
 }
 
-func (r *profileRepo) UpdateProfile(accountId string, update map[string]interface{}) (model.Profile, error) {
+func (r *profileRepo) UpdateProfile(userId string, update map[string]interface{}) (model.Profile, error) {
 	collection := r.db.Collection("profiles")
 
 	_, err := collection.UpdateOne(
 		context.Background(),
-		bson.M{"id": accountId},
+		bson.M{"id": userId},
 		bson.M{"$set": update},
 	)
 	if err != nil {
@@ -80,7 +80,7 @@ func (r *profileRepo) UpdateProfile(accountId string, update map[string]interfac
 	}
 
 	var updatedProfile model.Profile
-	err = collection.FindOne(context.Background(), bson.M{"id": accountId}).Decode(&updatedProfile)
+	err = collection.FindOne(context.Background(), bson.M{"id": userId}).Decode(&updatedProfile)
 	if err != nil {
 		return model.Profile{}, err
 	}

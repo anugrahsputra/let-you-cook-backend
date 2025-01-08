@@ -43,7 +43,7 @@ func (s *profileService) CreateProfile(userId string, email string, reqProfile d
 
 	profile := model.Profile{
 		Id:           uuid.New().String(),
-		IdAccount:    userId,
+		UserId:       userId,
 		Fullname:     reqProfile.Fullname,
 		Address:      reqProfile.Address,
 		Email:        email,
