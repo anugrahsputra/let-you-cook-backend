@@ -3,6 +3,7 @@ package model
 type Task struct {
 	Id          string   `json:"id" bson:"id"`
 	UserId      string   `json:"user_id" bson:"user_id"`
+	CategoryId  string   `json:"category_id" bson:"category_id"`
 	Title       string   `json:"title" bson:"title"`
 	Description string   `json:"description" bson:"description"`
 	Status      string   `json:"status" bson:"status"`
