@@ -70,6 +70,7 @@ func (h *TaskHandler) GetTasks(c *gin.Context) {
 
 func (h *TaskHandler) UpdateTask(c *gin.Context) {
 	id := c.Param("id")
+	userId := c.MustGet("user_id").(string)
 
 	if id == "" {
 		c.JSON(http.StatusBadRequest, dto.Resp{
@@ -91,7 +92,7 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 		return
 	}
 
-	task, err := h.taskService.UpdateTask(id, reqTask)
+	task, err := h.taskService.UpdateTask(id, userId, reqTask)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.Resp{
 			Status:  http.StatusInternalServerError,
@@ -106,5 +107,31 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 		Message: "task updated success",
 		Data:    task,
 	})
+}
 
+func (h *TaskHandler) DeleteTask(c *gin.Context) {
+	id := c.Param("id")
+	userId := c.MustGet("user_id").(string)
+
+	if id == "" {
+		c.JSON(http.StatusBadRequest, dto.Resp{
+			Status:  http.StatusBadRequest,
+			Message: "id is required",
+		})
+		return
+	}
+
+	_, err := h.taskService.DeleteTask(id, userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.Resp{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Resp{
+		Status:  http.StatusOK,
+		Message: "task deleted success",
+	})
 }

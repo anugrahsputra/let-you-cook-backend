@@ -12,6 +12,7 @@ func TaskRoute(r *gin.RouterGroup, taskHandler *handler.TaskHandler) {
 	{
 		taskRoutes.POST("", taskHandler.CreateTask)
 		taskRoutes.GET("", taskHandler.GetTasks)
-		taskRoutes.PUT("/:id", taskHandler.UpdateTask)
+		taskRoutes.PATCH("/:id", taskHandler.UpdateTask)
+		taskRoutes.DELETE("/:id", taskHandler.DeleteTask)
 	}
 }

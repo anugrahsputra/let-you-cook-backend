@@ -12,7 +12,8 @@ import (
 type ITaskRepo interface {
 	CreateTask(task model.Task) error
 	GetTasks(userId string) ([]model.Task, error)
-	UpdateTask(id string, update map[string]interface{}) (model.Task, error)
+	UpdateTask(id string, userId string, update map[string]interface{}) (model.Task, error)
+	DeleteTask(id string, userId string) (model.Task, error)
 }
 
 type taskRepo struct {
@@ -63,7 +64,7 @@ func (r *taskRepo) GetTasks(userId string) ([]model.Task, error) {
 	return tasks, nil
 }
 
-func (r *taskRepo) UpdateTask(id string, update map[string]interface{}) (model.Task, error) {
+func (r *taskRepo) UpdateTask(id string, userId string, update map[string]interface{}) (model.Task, error) {
 	collection := r.db.Collection("tasks")
 
 	_, err := collection.UpdateOne(context.Background(), bson.M{"id": id}, bson.M{"$set": update})
@@ -72,9 +73,20 @@ func (r *taskRepo) UpdateTask(id string, update map[string]interface{}) (model.T
 	}
 
 	var updatedTask model.Task
-	if err = collection.FindOne(context.Background(), bson.M{"id": id}).Decode(&updatedTask); err != nil {
+	if err = collection.FindOne(context.Background(), bson.M{"user_id": id}).Decode(&updatedTask); err != nil {
 		return model.Task{}, err
 	}
 
 	return updatedTask, nil
+}
+
+func (r *taskRepo) DeleteTask(id string, userId string) (model.Task, error) {
+	collection := r.db.Collection("tasks")
+
+	_, err := collection.DeleteOne(context.Background(), bson.M{"id": id})
+	if err != nil {
+		return model.Task{}, err
+	}
+
+	return model.Task{}, nil
 }
