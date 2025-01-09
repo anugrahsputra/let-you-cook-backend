@@ -7,6 +7,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/wiremessage"
 )
 
 type ITaskRepo interface {
@@ -46,9 +47,8 @@ func (r *taskRepo) GetTasks(userId string) ([]model.Task, error) {
 	if err != nil {
 		return nil, errors.New("failed to fetch tasks")
 	}
-	defer cursor.Close(context.Background())
 
-	// Iterate over the results
+	defer cursor.Close(context.Background())
 	for cursor.Next(context.Background()) {
 		var task model.Task
 		if err := cursor.Decode(&task); err != nil {
@@ -67,13 +67,33 @@ func (r *taskRepo) GetTasks(userId string) ([]model.Task, error) {
 func (r *taskRepo) UpdateTask(id string, userId string, update map[string]interface{}) (model.Task, error) {
 	collection := r.db.Collection("tasks")
 
-	_, err := collection.UpdateOne(context.Background(), bson.M{"id": id}, bson.M{"$set": update})
+	var existingTask model.Task
+	err := collection.FindOne(context.Background(), bson.M{
+		"id":      id,
+		"user_id": userId,
+	}).Decode(&existingTask)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return model.Task{}, errors.New("task not found or unauthorized")
+		}
+		return model.Task{}, err
+	}
+
+	_, err = collection.UpdateOne(
+		context.Background(),
+		bson.M{"id": id, "user_id": userId},
+		bson.M{"$set": update},
+	)
 	if err != nil {
 		return model.Task{}, err
 	}
 
 	var updatedTask model.Task
-	if err = collection.FindOne(context.Background(), bson.M{"user_id": id}).Decode(&updatedTask); err != nil {
+	if err = collection.FindOne(context.Background(), bson.M{
+		"id":      id,
+		"user_id": userId,
+	}).Decode(&updatedTask); err != nil {
 		return model.Task{}, err
 	}
 
@@ -83,10 +103,25 @@ func (r *taskRepo) UpdateTask(id string, userId string, update map[string]interf
 func (r *taskRepo) DeleteTask(id string, userId string) (model.Task, error) {
 	collection := r.db.Collection("tasks")
 
-	_, err := collection.DeleteOne(context.Background(), bson.M{"id": id})
+	var taskToDelete model.Task
+	err := collection.FindOne(context.Background(), bson.M{
+		"id":      id,
+		"user_id": userId,
+	}).Decode(&taskToDelete)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return model.Task{}, errors.New("task not found")
+		}
+		return model.Task{}, err
+	}
+	_, err = collection.DeleteOne(context.Background(), bson.M{
+		"id":      id,
+		"user_id": userId,
+	})
 	if err != nil {
 		return model.Task{}, err
 	}
 
-	return model.Task{}, nil
+	return taskToDelete, nil
 }
