@@ -15,7 +15,7 @@ type Task struct {
 }
 
 type TaskByCategoryGroup struct {
-	CategoryId string   `json:"category_id" bson:"category_id"`
-	Category   Category `json:"category" bson:"category"`
-	Tasks      []Task   `json:"tasks" bson:"tasks"`
+	CategoryId   string `json:"category_id" bson:"category_id"`
+	CategoryName string `json:"category_name" bson:"category_name"`
+	Tasks        []Task `json:"tasks" bson:"tasks"`
 }

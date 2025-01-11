@@ -65,54 +65,32 @@ func (r *taskRepo) GetTasks(userId string) ([]model.Task, error) {
 }
 
 func (r *taskRepo) GetTaskGroupedByCategory(userId string) ([]model.TaskByCategoryGroup, error) {
-	collection := r.db.Collection("tasks")
+	collection := r.db.Collection("categories")
 
 	pipeline := mongo.Pipeline{
 		{
-			{Key: "$match", Value: bson.M{"user_id": userId}},
-		},
-		{
 			{Key: "$lookup", Value: bson.M{
-				"from":         "categories",
-				"localField":   "category_id",
-				"foreignField": "id",
-				"as":           "category",
-			}},
-		},
-		{
-			{Key: "$unwind", Value: bson.M{
-				"path":                       "$category",
-				"preserveNullAndEmptyArrays": false,
-			}},
-		},
-		{
-			{Key: "$group", Value: bson.M{
-				"_id": "$category.id",
-				"category": bson.M{
-					"$first": "$category",
-				},
-				"tasks": bson.M{
-					"$push": bson.M{
-						"id":           "$id",
-						"user_id":      "$user_id",
-						"title":        "$title",
-						"description":  "$description",
-						"status":       "$status",
-						"priority":     "$priority",
-						"created_at":   "$created_at",
-						"updated_at":   "$updated_at",
-						"completed_at": "$completed_at",
-						"tags":         "$tags",
-					},
-				},
+				"from":         "tasks",
+				"localField":   "id",
+				"foreignField": "category_id",
+				"pipeline": []bson.M{{
+					"$match": bson.M{"user_id": userId},
+				}},
+				"as": "tasks",
 			}},
 		},
 		{
 			{Key: "$project", Value: bson.M{
-				"category_id": "$_id",
-				"category":    1,
-				"tasks":       1,
-				"_id":         0,
+				"category_id":   "$id",
+				"category_name": "$name",
+				"tasks": bson.M{
+					"$filter": bson.M{
+						"input": "$tasks",
+						"as":    "task",
+						"cond":  bson.M{"$ne": bson.A{"$$task", nil}},
+					},
+				},
+				"_id": 0,
 			}},
 		},
 	}
