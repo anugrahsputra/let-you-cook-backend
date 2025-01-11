@@ -31,6 +31,15 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 		return
 	}
 
+	if reqCategory.Name == "" {
+		c.JSON(http.StatusBadRequest, dto.Resp{
+			Status:  http.StatusBadRequest,
+			Message: "category name cannot be empty",
+			Data:    nil,
+		})
+		return
+	}
+
 	if err := h.categoryService.CreateCategory(userId, reqCategory); err != nil {
 		c.JSON(http.StatusInternalServerError, dto.Resp{
 			Status:  http.StatusInternalServerError,
@@ -46,10 +55,17 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	})
 }
 
-func (h *CategoryHandler) GetCategories(c *gin.Context) {
+func (h CategoryHandler) GetCategories(c *gin.Context) {
 	userId := c.MustGet("user_id").(string)
+	id := c.Query("id")
+	name := c.Query("name")
 
-	categories, err := h.categoryService.GetCategories(userId)
+	req := dto.ReqCategory{
+		Id:   id,
+		Name: name,
+	}
+
+	categories, err := h.categoryService.GetCategories(userId, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.Resp{
 			Status:  http.StatusInternalServerError,
@@ -109,7 +125,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	var reqUpdateCategory dto.ReqUpdateCategory
+	var reqUpdateCategory dto.ReqCreateCategory
 	if err := c.ShouldBindJSON(&reqUpdateCategory); err != nil {
 		c.JSON(http.StatusBadRequest, dto.Resp{
 			Status:  http.StatusBadRequest,
