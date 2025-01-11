@@ -5,6 +5,7 @@ import (
 	"errors"
 	"let-you-cook/domain/dto"
 	"let-you-cook/domain/model"
+	"regexp"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -12,9 +13,9 @@ import (
 
 type ICategoryRepo interface {
 	CreateCategory(category model.Category) error
-	GetCategories(userId string) ([]model.Category, error)
+	GetCategories(userId string, reqCategory dto.ReqCategory) ([]model.Category, error)
 	GetCategoryById(id string, userId string) (model.Category, error)
-	UpdateCategory(id string, userId string, update dto.ReqUpdateCategory) (model.Category, error)
+	UpdateCategory(id string, userId string, update dto.ReqCreateCategory) (model.Category, error)
 	DeleteCategory(id string, userId string) (model.Category, error)
 }
 
@@ -33,18 +34,38 @@ func NewCategoryRepo(db *mongo.Database, indexRepo *IndexRepo) *categoryRepo {
 func (r *categoryRepo) CreateCategory(category model.Category) error {
 	collection := r.db.Collection("categories")
 
-	_, err := collection.InsertOne(context.Background(), category)
+	var existingCategory model.Category
+	err := collection.FindOne(context.Background(), bson.M{"name": bson.M{"$regex": "^" + regexp.QuoteMeta(category.Name) + "$", "$options": "i"}}).Decode(&existingCategory)
+	if err == nil {
+		return errors.New("kategori dengan nama ini sudah ada")
+	}
+	if err != mongo.ErrNoDocuments {
+		return err
+	}
+	_, err = collection.InsertOne(context.Background(), category)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *categoryRepo) GetCategories(userId string) ([]model.Category, error) {
-	collection := r.db.Collection("categories")
-
+func (r *categoryRepo) GetCategories(userId string, reqCategory dto.ReqCategory) ([]model.Category, error) {
 	var categories []model.Category
-	cursor, err := collection.Find(context.Background(), bson.M{"user_id": userId})
+
+	filter := bson.M{"user_id": userId}
+	if reqCategory.Id != "" {
+		filter["id"] = reqCategory.Id
+	}
+
+	if reqCategory.Name != "" {
+		filter["name"] = bson.M{
+			"$regex":   `(?i)` + reqCategory.Name,
+			"$options": "i",
+		}
+	}
+
+	collection := r.db.Collection("categories")
+	cursor, err := collection.Find(context.Background(), filter)
 	if err != nil {
 		return nil, errors.New("failed to fetch categories")
 	}
@@ -83,7 +104,7 @@ func (r *categoryRepo) GetCategoryById(id string, userId string) (model.Category
 	return category, nil
 }
 
-func (r *categoryRepo) UpdateCategory(id string, userId string, update dto.ReqUpdateCategory) (model.Category, error) {
+func (r *categoryRepo) UpdateCategory(id string, userId string, update dto.ReqCreateCategory) (model.Category, error) {
 	collection := r.db.Collection("categories")
 
 	var existingCategory model.Category
