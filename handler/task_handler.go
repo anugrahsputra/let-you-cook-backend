@@ -68,6 +68,26 @@ func (h *TaskHandler) GetTasks(c *gin.Context) {
 
 }
 
+func (h *TaskHandler) GetTaskGroupedByCategory(c *gin.Context) {
+	userId := c.MustGet("user_id").(string)
+
+	taskByCategoryGroup, err := h.taskService.GetTaskGroupedByCategory(userId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.Resp{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Resp{
+		Status:  http.StatusOK,
+		Message: "success",
+		Data:    taskByCategoryGroup,
+	})
+}
+
 func (h *TaskHandler) UpdateTask(c *gin.Context) {
 	id := c.Param("id")
 	userId := c.MustGet("user_id").(string)

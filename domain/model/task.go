@@ -13,3 +13,9 @@ type Task struct {
 	CompletedAt int      `json:"completed_at" bson:"completed_at"`
 	Tags        []string `json:"tags" bson:"tags"`
 }
+
+type TaskByCategoryGroup struct {
+	CategoryId string   `json:"category_id" bson:"category_id"`
+	Category   Category `json:"category" bson:"category"`
+	Tasks      []Task   `json:"tasks" bson:"tasks"`
+}

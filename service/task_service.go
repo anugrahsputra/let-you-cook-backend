@@ -12,6 +12,7 @@ import (
 type ITaskService interface {
 	CreateTask(userId string, task dto.ReqTask) error
 	GetTasks(userId string) ([]model.Task, error)
+	GetTaskGroupedByCategory(userId string) ([]model.TaskByCategoryGroup, error)
 	UpdateTask(id string, userId string, update map[string]interface{}) (model.Task, error)
 	DeleteTask(id string, userId string) (model.Task, error)
 }
@@ -59,6 +60,15 @@ func (s *taskService) CreateTask(userId string, task dto.ReqTask) error {
 
 func (s *taskService) GetTasks(userId string) ([]model.Task, error) {
 	tasks, err := s.repo.GetTasks(userId)
+	if err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
+}
+
+func (s *taskService) GetTaskGroupedByCategory(userId string) ([]model.TaskByCategoryGroup, error) {
+	tasks, err := s.repo.GetTaskGroupedByCategory(userId)
 	if err != nil {
 		return nil, err
 	}
