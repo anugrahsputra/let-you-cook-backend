@@ -12,9 +12,9 @@ type TaskHandler struct {
 	taskService service.ITaskService
 }
 
-func NewTaskHandler(taskHandler service.ITaskService) *TaskHandler {
+func NewTaskHandler(taskService service.ITaskService) *TaskHandler {
 	return &TaskHandler{
-		taskService: taskHandler,
+		taskService: taskService,
 	}
 }
 

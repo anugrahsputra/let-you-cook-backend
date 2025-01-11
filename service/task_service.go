@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"let-you-cook/domain/dto"
 	"let-you-cook/domain/model"
 	"let-you-cook/repository"
@@ -40,6 +39,7 @@ func (s *taskService) CreateTask(userId string, task dto.ReqTask) error {
 		Id:          uuid.New().String(),
 		UserId:      idUser.Id,
 		Title:       task.Title,
+		CategoryId:  task.CategoryId,
 		Description: task.Description,
 		Status:      task.Status,
 		Priority:    task.Priority,
@@ -67,18 +67,9 @@ func (s *taskService) GetTasks(userId string) ([]model.Task, error) {
 }
 
 func (s *taskService) UpdateTask(id string, userId string, update map[string]interface{}) (model.Task, error) {
-	existingTask, err := s.repo.UpdateTask(id, userId, update)
-	if err != nil {
-		return model.Task{}, err
-	}
-
-	if existingTask.Id == "" {
-		return model.Task{}, errors.New("task not found")
-	}
-
 	update["updated_at"] = int(time.Now().Unix())
 
-	updatedTask, err := s.repo.UpdateTask(existingTask.Id, existingTask.UserId, update)
+	updatedTask, err := s.repo.UpdateTask(id, userId, update)
 
 	if err != nil {
 		return model.Task{}, err
