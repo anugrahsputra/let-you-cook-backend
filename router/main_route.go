@@ -42,10 +42,16 @@ func SetupRouter() *gin.Engine {
 	taskService := service.NewTaskService(taskRepo, userRepo)
 	taskHandler := handler.NewTaskHandler(taskService)
 
+	// category SetupRouter
+	categoryRepo := repository.NewCategoryRepo(db, indexRepo)
+	categoryService := service.NewCategoryService(categoryRepo, userRepo)
+	categoryHandler := handler.NewCategoryHandler(categoryService)
+
 	AuthRoute(apiV1, authHandler)
 	UserRoute(apiV1, userHandler)
 	ProfileRoute(apiV1, profileHandler)
 	TaskRoute(apiV1, taskHandler)
+	CategoryRoute(apiV1, categoryHandler)
 
 	return route
 }
