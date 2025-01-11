@@ -12,9 +12,9 @@ import (
 
 type ICategoryService interface {
 	CreateCategory(userId string, category dto.ReqCategory) error
-	GetCategories(userId string) ([]model.Category, error)
+	GetCategories(userId string, reqCategory dto.ReqCategory) ([]model.Category, error)
 	GetCategoryById(id string, userId string) (model.Category, error)
-	UpdateCategory(id string, userId string, update dto.ReqUpdateCategory) (model.Category, error)
+	UpdateCategory(id string, userId string, update dto.ReqCreateCategory) (model.Category, error)
 	DeleteCategory(id string, userId string) (model.Category, error)
 }
 
@@ -30,7 +30,7 @@ func NewCategoryService(repoCategory repository.ICategoryRepo, repoUser reposito
 	}
 }
 
-func (s *categoryService) CreateCategory(userId string, category dto.ReqCategory) error {
+func (s *categoryService) CreateCategory(userId string, reqCategory dto.ReqCategory) error {
 	user, err := s.repoUser.GetUserById(userId)
 
 	if err != nil {
@@ -39,7 +39,7 @@ func (s *categoryService) CreateCategory(userId string, category dto.ReqCategory
 
 	newCategory := model.Category{
 		Id:        uuid.New().String(),
-		Name:      category.Name,
+		Name:      reqCategory.Name,
 		UserId:    user.Id,
 		CreatedAt: int(time.Now().Unix()),
 		UpdatedAt: int(time.Now().Unix()),
@@ -51,8 +51,8 @@ func (s *categoryService) CreateCategory(userId string, category dto.ReqCategory
 	return nil
 }
 
-func (s *categoryService) GetCategories(userId string) ([]model.Category, error) {
-	categories, err := s.repoCategory.GetCategories(userId)
+func (s *categoryService) GetCategories(userId string, reqCategory dto.ReqCategory) ([]model.Category, error) {
+	categories, err := s.repoCategory.GetCategories(userId, reqCategory)
 
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func (s *categoryService) GetCategoryById(id string, userId string) (model.Categ
 
 }
 
-func (s *categoryService) UpdateCategory(id string, userId string, update dto.ReqUpdateCategory) (model.Category, error) {
+func (s *categoryService) UpdateCategory(id string, userId string, update dto.ReqCreateCategory) (model.Category, error) {
 	updatedCategory, err := s.repoCategory.UpdateCategory(id, userId, update)
 
 	if err != nil {
