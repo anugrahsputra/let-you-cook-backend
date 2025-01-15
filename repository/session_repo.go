@@ -20,8 +20,8 @@ const (
 
 type ISessionRepo interface {
 	CreateSession(session model.PomodoroSession) error
-	StartSession(id string, userId string) (model.PomodoroSession, error)
-	EndSession(id string, userId string) (model.PomodoroSession, error)
+	StartSession(id string, userId string) error
+	EndSession(id string, userId string) error
 	GetAllSessions(useId string) ([]model.PomodoroSession, error)
 }
 
@@ -64,7 +64,7 @@ func (r *sessionRepo) CreateSession(session model.PomodoroSession) error {
 	return nil
 }
 
-func (r *sessionRepo) StartSession(id string, userId string) (model.PomodoroSession, error) {
+func (r *sessionRepo) StartSession(id string, userId string) error {
 	collection := r.db.Collection(collectionName)
 
 	filter := bson.M{fieldId: id, fieldUserId: userId}
@@ -73,15 +73,15 @@ func (r *sessionRepo) StartSession(id string, userId string) (model.PomodoroSess
 	_, err := collection.UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return model.PomodoroSession{}, errors.New("session not found")
+			return errors.New("session not found")
 		}
-		return model.PomodoroSession{}, err
+		return err
 	}
 
-	return model.PomodoroSession{}, nil
+	return nil
 }
 
-func (r *sessionRepo) EndSession(id string, userId string) (model.PomodoroSession, error) {
+func (r *sessionRepo) EndSession(id string, userId string) error {
 	collection := r.db.Collection(collectionName)
 
 	filter := bson.M{fieldId: id, fieldUserId: userId}
@@ -97,12 +97,12 @@ func (r *sessionRepo) EndSession(id string, userId string) (model.PomodoroSessio
 	_, err := collection.UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return model.PomodoroSession{}, errors.New("session not found")
+			return errors.New("session not found")
 		}
-		return model.PomodoroSession{}, err
+		return err
 	}
 
-	return model.PomodoroSession{}, nil
+	return nil
 }
 
 func (r *sessionRepo) GetAllSessions(userId string) ([]model.PomodoroSession, error) {

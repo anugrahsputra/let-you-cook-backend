@@ -81,7 +81,7 @@ func (h *SessionHandler) StartSession(c *gin.Context) {
 		return
 	}
 
-	session, err := h.sessionService.StartSession(id, userId)
+	err := h.sessionService.StartSession(id, userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.Resp{
 			Status:  http.StatusInternalServerError,
@@ -94,7 +94,7 @@ func (h *SessionHandler) StartSession(c *gin.Context) {
 	c.JSON(http.StatusOK, dto.Resp{
 		Status:  http.StatusOK,
 		Message: "session started",
-		Data:    session,
+		Data:    nil,
 	})
 }
 
@@ -111,7 +111,7 @@ func (h *SessionHandler) EndSession(c *gin.Context) {
 		return
 	}
 
-	session, err := h.sessionService.EndSession(id, userId)
+	err := h.sessionService.EndSession(id, userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.Resp{
 			Status:  http.StatusInternalServerError,
@@ -124,7 +124,7 @@ func (h *SessionHandler) EndSession(c *gin.Context) {
 	c.JSON(http.StatusOK, dto.Resp{
 		Status:  http.StatusOK,
 		Message: "session ended",
-		Data:    session,
+		Data:    nil,
 	})
 }
 
