@@ -37,7 +37,7 @@ func (r *categoryRepo) CreateCategory(category model.Category) error {
 	var existingCategory model.Category
 	err := collection.FindOne(context.Background(), bson.M{"name": bson.M{"$regex": "^" + regexp.QuoteMeta(category.Name) + "$", "$options": "i"}}).Decode(&existingCategory)
 	if err == nil {
-		return errors.New("kategori dengan nama ini sudah ada")
+		return errors.New("category with this name already exists")
 	}
 	if err != mongo.ErrNoDocuments {
 		return err
