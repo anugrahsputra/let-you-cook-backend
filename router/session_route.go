@@ -10,6 +10,7 @@ import (
 func SessionRoute(r *gin.RouterGroup, sessionHandler *handler.SessionHandler) {
 	sessionRoutes := r.Group("/session", middleware.AuthMiddleware())
 	{
+		sessionRoutes.GET("", sessionHandler.GetAllSessions)
 		sessionRoutes.POST("", sessionHandler.CreateSession)
 		sessionRoutes.POST("/start/:id", sessionHandler.StartSession)
 		sessionRoutes.POST("/end/:id", sessionHandler.EndSession)

@@ -13,6 +13,7 @@ type ISessionService interface {
 	CreateSession(userId string, req dto.ReqCreateSession) error
 	StartSession(id string, userId string) (model.PomodoroSession, error)
 	EndSession(id string, userId string) (model.PomodoroSession, error)
+	GetAllSessions(userId string) ([]model.PomodoroSession, error)
 }
 
 type sessionService struct {
@@ -72,4 +73,14 @@ func (s *sessionService) EndSession(id string, userId string) (model.PomodoroSes
 
 	return session, nil
 
+}
+
+func (s *sessionService) GetAllSessions(userId string) ([]model.PomodoroSession, error) {
+	sessions, err := s.repoSession.GetAllSessions(userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return sessions, nil
 }

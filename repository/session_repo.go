@@ -22,6 +22,7 @@ type ISessionRepo interface {
 	CreateSession(session model.PomodoroSession) error
 	StartSession(id string, userId string) (model.PomodoroSession, error)
 	EndSession(id string, userId string) (model.PomodoroSession, error)
+	GetAllSessions(useId string) ([]model.PomodoroSession, error)
 }
 
 type sessionRepo struct {
@@ -102,4 +103,28 @@ func (r *sessionRepo) EndSession(id string, userId string) (model.PomodoroSessio
 	}
 
 	return model.PomodoroSession{}, nil
+}
+
+func (r *sessionRepo) GetAllSessions(userId string) ([]model.PomodoroSession, error) {
+	collection := r.db.Collection(collectionName)
+
+	var sessions []model.PomodoroSession
+	cursor, err := collection.Find(context.Background(), bson.M{fieldUserId: userId})
+	if err != nil {
+		return nil, errors.New("failed to fetch tasks")
+	}
+
+	defer cursor.Close(context.Background())
+	for cursor.Next(context.Background()) {
+		var session model.PomodoroSession
+		if err := cursor.Decode(&session); err != nil {
+			return nil, err
+		}
+		sessions = append(sessions, session)
+	}
+
+	if err := cursor.Err(); err != nil {
+		return nil, err
+	}
+	return sessions, nil
 }

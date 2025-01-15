@@ -127,3 +127,24 @@ func (h *SessionHandler) EndSession(c *gin.Context) {
 		Data:    session,
 	})
 }
+
+func (h *SessionHandler) GetAllSessions(c *gin.Context) {
+	userId := c.MustGet(USER_ID).(string)
+
+	sessions, err := h.sessionService.GetAllSessions(userId)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.Resp{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+			Data:    nil,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Resp{
+		Status:  http.StatusOK,
+		Message: "success",
+		Data:    sessions,
+	})
+}
