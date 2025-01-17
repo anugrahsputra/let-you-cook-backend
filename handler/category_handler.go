@@ -125,7 +125,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	var reqUpdateCategory dto.ReqCreateCategory
+	var reqUpdateCategory dto.ReqPatchCategory
 	if err := c.ShouldBindJSON(&reqUpdateCategory); err != nil {
 		c.JSON(http.StatusBadRequest, dto.Resp{
 			Status:  http.StatusBadRequest,

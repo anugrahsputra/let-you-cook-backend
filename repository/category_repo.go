@@ -15,8 +15,8 @@ type ICategoryRepo interface {
 	CreateCategory(category model.Category) error
 	GetCategories(userId string, reqCategory dto.ReqCategory) ([]model.Category, error)
 	GetCategoryById(id string, userId string) (model.Category, error)
-	UpdateCategory(id string, userId string, update dto.ReqCreateCategory) (model.Category, error)
-	DeleteCategory(id string, userId string) (model.Category, error)
+	UpdateCategory(id string, userId string, category model.Category) error
+	DeleteCategory(id string, userId string) error
 }
 
 type categoryRepo struct {
@@ -104,66 +104,33 @@ func (r *categoryRepo) GetCategoryById(id string, userId string) (model.Category
 	return category, nil
 }
 
-func (r *categoryRepo) UpdateCategory(id string, userId string, update dto.ReqCreateCategory) (model.Category, error) {
+func (r *categoryRepo) UpdateCategory(id string, userId string, update model.Category) error {
 	collection := r.db.Collection("categories")
 
-	var existingCategory model.Category
-	err := collection.FindOne(context.Background(), bson.M{
-		"id":      id,
-		"user_id": userId,
-	}).Decode(&existingCategory)
-
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return model.Category{}, errors.New("category not found")
-		}
-		return model.Category{}, err
-	}
-
-	_, err = collection.UpdateOne(
+	_, err := collection.UpdateOne(
 		context.Background(),
 		bson.M{"id": id, "user_id": userId},
 		bson.M{"$set": update},
 	)
 
 	if err != nil {
-		return model.Category{}, err
+		return err
 	}
 
-	var updatedCategory model.Category
-	if err = collection.FindOne(context.Background(), bson.M{
-		"id":      id,
-		"user_id": userId,
-	}).Decode(&updatedCategory); err != nil {
-		return model.Category{}, err
-	}
-
-	return updatedCategory, nil
+	return nil
 
 }
 
-func (r *categoryRepo) DeleteCategory(id string, userid string) (model.Category, error) {
+func (r *categoryRepo) DeleteCategory(id string, userid string) error {
 	collection := r.db.Collection("categories")
 
-	var categoryToDelete model.Category
-	err := collection.FindOne(context.Background(), bson.M{
-		"id":      id,
-		"user_id": userid,
-	}).Decode(&categoryToDelete)
-
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return model.Category{}, errors.New("category not found")
-		}
-		return model.Category{}, err
-	}
-	_, err = collection.DeleteOne(context.Background(), bson.M{
+	_, err := collection.DeleteOne(context.Background(), bson.M{
 		"id":      id,
 		"user_id": userid,
 	})
 	if err != nil {
-		return model.Category{}, err
+		return err
 	}
 
-	return categoryToDelete, nil
+	return nil
 }

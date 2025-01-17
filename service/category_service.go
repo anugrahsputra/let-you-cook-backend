@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"let-you-cook/domain/dto"
 	"let-you-cook/domain/model"
 	"let-you-cook/repository"
@@ -12,10 +11,10 @@ import (
 
 type ICategoryService interface {
 	CreateCategory(userId string, category dto.ReqCategory) error
-	GetCategories(userId string, reqCategory dto.ReqCategory) ([]model.Category, error)
-	GetCategoryById(id string, userId string) (model.Category, error)
-	UpdateCategory(id string, userId string, update dto.ReqCreateCategory) (model.Category, error)
-	DeleteCategory(id string, userId string) (model.Category, error)
+	GetCategories(userId string, reqCategory dto.ReqCategory) ([]dto.CategoryResp, error)
+	GetCategoryById(id string, userId string) (dto.CategoryResp, error)
+	UpdateCategory(id string, userId string, update dto.ReqPatchCategory) (dto.CategoryResp, error)
+	DeleteCategory(id string, userId string) (dto.CategoryResp, error)
 }
 
 type categoryService struct {
@@ -51,48 +50,59 @@ func (s *categoryService) CreateCategory(userId string, reqCategory dto.ReqCateg
 	return nil
 }
 
-func (s *categoryService) GetCategories(userId string, reqCategory dto.ReqCategory) ([]model.Category, error) {
+func (s *categoryService) GetCategories(userId string, reqCategory dto.ReqCategory) ([]dto.CategoryResp, error) {
 	categories, err := s.repoCategory.GetCategories(userId, reqCategory)
-
 	if err != nil {
 		return nil, err
 	}
 
-	return categories, nil
+	categoryResp := make([]dto.CategoryResp, 0)
+	for _, category := range categories {
+		categoryResp = append(categoryResp, category.ToDTO())
+	}
+
+	return categoryResp, nil
 }
 
-func (s *categoryService) GetCategoryById(id string, userId string) (model.Category, error) {
+func (s *categoryService) GetCategoryById(id string, userId string) (dto.CategoryResp, error) {
 	category, err := s.repoCategory.GetCategoryById(id, userId)
-
 	if err != nil {
-		return model.Category{}, err
+		return category.ToDTO(), err
 	}
 
-	return category, nil
+	return category.ToDTO(), nil
 
 }
 
-func (s *categoryService) UpdateCategory(id string, userId string, update dto.ReqCreateCategory) (model.Category, error) {
-	updatedCategory, err := s.repoCategory.UpdateCategory(id, userId, update)
-
+func (s *categoryService) UpdateCategory(id string, userId string, payload dto.ReqPatchCategory) (dto.CategoryResp, error) {
+	existingCategory, err := s.repoCategory.GetCategoryById(id, userId)
 	if err != nil {
-		if err.Error() == "category not found" {
-			return model.Category{}, errors.New("category not found")
-		}
-		return model.Category{}, err
+		return dto.CategoryResp{}, err
 	}
 
-	return updatedCategory, nil
+	if payload.Name != nil {
+		existingCategory.Name = *payload.Name
+	}
+
+	err = s.repoCategory.UpdateCategory(id, userId, existingCategory)
+	if err != nil {
+		return dto.CategoryResp{}, err
+	}
+
+	return existingCategory.ToDTO(), nil
 
 }
 
-func (s *categoryService) DeleteCategory(id string, userId string) (model.Category, error) {
-	deletedCategory, err := s.repoCategory.DeleteCategory(id, userId)
+func (s *categoryService) DeleteCategory(id string, userId string) (dto.CategoryResp, error) {
+	deletedCategory, err := s.repoCategory.GetCategoryById(id, userId)
 	if err != nil {
-		if err.Error() == "category not found" {
-			return model.Category{}, errors.New("category not found")
-		}
-		return model.Category{}, err
+		return dto.CategoryResp{}, err
 	}
-	return deletedCategory, nil
+
+	err = s.repoCategory.DeleteCategory(id, userId)
+	if err != nil {
+		return dto.CategoryResp{}, err
+	}
+
+	return deletedCategory.ToDTO(), nil
 }
