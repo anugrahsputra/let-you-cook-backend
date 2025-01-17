@@ -1,13 +1,13 @@
 package service
 
 import (
-	"let-you-cook/domain/model"
+	"let-you-cook/domain/dto"
 	"let-you-cook/repository"
 )
 
 type IUserService interface {
-	GetAllUsers() ([]model.User, error)
-	GetUserById(userID string) (model.User, error)
+	GetAllUsers() ([]dto.UserResp, error)
+	GetUserById(userID string) (dto.UserResp, error)
 }
 
 type userService struct {
@@ -20,14 +20,24 @@ func NewUserService(repo repository.IUserRepo) *userService {
 	}
 }
 
-func (s *userService) GetAllUsers() ([]model.User, error) {
-	return s.repo.GetAllUsers()
+func (s *userService) GetAllUsers() ([]dto.UserResp, error) {
+	users, err := s.repo.GetAllUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	var userResp []dto.UserResp
+	for _, user := range users {
+		userResp = append(userResp, user.ToDTO())
+	}
+
+	return userResp, nil
 }
 
-func (s *userService) GetUserById(userId string) (model.User, error) {
+func (s *userService) GetUserById(userId string) (dto.UserResp, error) {
 	user, err := s.repo.GetUserById(userId)
 	if err != nil {
-		return user, err
+		return user.ToDTO(), err
 	}
-	return user, nil
+	return user.ToDTO(), nil
 }
