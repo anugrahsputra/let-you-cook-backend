@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"let-you-cook/domain/dto"
 	"let-you-cook/domain/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -12,9 +13,10 @@ import (
 type ITaskRepo interface {
 	CreateTask(task model.Task) error
 	GetTasks(userId string) ([]model.Task, error)
-	GetTaskGroupedByCategory(userId string) ([]model.TaskByCategoryGroup, error)
-	UpdateTask(id string, userId string, update map[string]interface{}) (model.Task, error)
-	DeleteTask(id string, userId string) (model.Task, error)
+	GetTaskGroupedByCategory(userId string) ([]dto.TaskByCategoryGroupResp, error)
+	UpdateTask(id string, userId string, update model.Task) error
+	DeleteTask(id string, userId string) error
+	FindTask(id string, userId string) (model.Task, error)
 }
 
 type taskRepo struct {
@@ -64,7 +66,7 @@ func (r *taskRepo) GetTasks(userId string) ([]model.Task, error) {
 	return tasks, nil
 }
 
-func (r *taskRepo) GetTaskGroupedByCategory(userId string) ([]model.TaskByCategoryGroup, error) {
+func (r *taskRepo) GetTaskGroupedByCategory(userId string) ([]dto.TaskByCategoryGroupResp, error) {
 	collection := r.db.Collection("categories")
 
 	pipeline := mongo.Pipeline{
@@ -95,7 +97,7 @@ func (r *taskRepo) GetTaskGroupedByCategory(userId string) ([]model.TaskByCatego
 		},
 	}
 
-	var result []model.TaskByCategoryGroup
+	var result []dto.TaskByCategoryGroupResp
 	cursor, err := collection.Aggregate(context.Background(), pipeline)
 	if err != nil {
 		return nil, err
@@ -103,7 +105,7 @@ func (r *taskRepo) GetTaskGroupedByCategory(userId string) ([]model.TaskByCatego
 
 	defer cursor.Close(context.Background())
 	for cursor.Next(context.Background()) {
-		var group model.TaskByCategoryGroup
+		var group dto.TaskByCategoryGroupResp
 		if err := cursor.Decode(&group); err != nil {
 			return nil, err
 		}
@@ -117,7 +119,36 @@ func (r *taskRepo) GetTaskGroupedByCategory(userId string) ([]model.TaskByCatego
 	return result, nil
 }
 
-func (r *taskRepo) UpdateTask(id string, userId string, update map[string]interface{}) (model.Task, error) {
+func (r *taskRepo) UpdateTask(id string, userId string, update model.Task) error {
+	collection := r.db.Collection("tasks")
+
+	_, err := collection.UpdateOne(
+		context.Background(),
+		bson.M{"id": id, "user_id": userId},
+		bson.M{"$set": update},
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *taskRepo) DeleteTask(id string, userId string) error {
+	collection := r.db.Collection("tasks")
+
+	_, err := collection.DeleteOne(context.Background(), bson.M{
+		"id":      id,
+		"user_id": userId,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *taskRepo) FindTask(id string, userId string) (model.Task, error) {
 	collection := r.db.Collection("tasks")
 
 	var existingTask model.Task
@@ -133,48 +164,5 @@ func (r *taskRepo) UpdateTask(id string, userId string, update map[string]interf
 		return model.Task{}, err
 	}
 
-	_, err = collection.UpdateOne(
-		context.Background(),
-		bson.M{"id": id, "user_id": userId},
-		bson.M{"$set": update},
-	)
-	if err != nil {
-		return model.Task{}, err
-	}
-
-	var updatedTask model.Task
-	if err = collection.FindOne(context.Background(), bson.M{
-		"id":      id,
-		"user_id": userId,
-	}).Decode(&updatedTask); err != nil {
-		return model.Task{}, err
-	}
-
-	return updatedTask, nil
-}
-
-func (r *taskRepo) DeleteTask(id string, userId string) (model.Task, error) {
-	collection := r.db.Collection("tasks")
-
-	var taskToDelete model.Task
-	err := collection.FindOne(context.Background(), bson.M{
-		"id":      id,
-		"user_id": userId,
-	}).Decode(&taskToDelete)
-
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return model.Task{}, errors.New("task not found")
-		}
-		return model.Task{}, err
-	}
-	_, err = collection.DeleteOne(context.Background(), bson.M{
-		"id":      id,
-		"user_id": userId,
-	})
-	if err != nil {
-		return model.Task{}, err
-	}
-
-	return taskToDelete, nil
+	return existingTask, nil
 }

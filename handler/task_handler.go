@@ -101,7 +101,7 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 		return
 	}
 
-	var reqTask map[string]interface{}
+	var reqTask dto.ReqPatchTask
 
 	if err := c.ShouldBindJSON(&reqTask); err != nil {
 		c.JSON(http.StatusBadRequest, dto.Resp{

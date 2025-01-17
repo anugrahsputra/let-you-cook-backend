@@ -11,10 +11,10 @@ import (
 
 type ITaskService interface {
 	CreateTask(userId string, task dto.ReqTask) error
-	GetTasks(userId string) ([]model.Task, error)
-	GetTaskGroupedByCategory(userId string) ([]model.TaskByCategoryGroup, error)
-	UpdateTask(id string, userId string, update map[string]interface{}) (model.Task, error)
-	DeleteTask(id string, userId string) (model.Task, error)
+	GetTasks(userId string) ([]dto.TaskResp, error)
+	GetTaskGroupedByCategory(userId string) ([]dto.TaskByCategoryGroupResp, error)
+	UpdateTask(id string, userId string, payload dto.ReqPatchTask) (dto.TaskResp, error)
+	DeleteTask(id string, userId string) (dto.TaskResp, error)
 }
 
 type taskService struct {
@@ -58,16 +58,21 @@ func (s *taskService) CreateTask(userId string, task dto.ReqTask) error {
 
 }
 
-func (s *taskService) GetTasks(userId string) ([]model.Task, error) {
+func (s *taskService) GetTasks(userId string) ([]dto.TaskResp, error) {
 	tasks, err := s.repo.GetTasks(userId)
 	if err != nil {
 		return nil, err
 	}
 
-	return tasks, nil
+	taskResponse := make([]dto.TaskResp, 0)
+	for _, task := range tasks {
+		taskResponse = append(taskResponse, task.ToDTO())
+	}
+
+	return taskResponse, nil
 }
 
-func (s *taskService) GetTaskGroupedByCategory(userId string) ([]model.TaskByCategoryGroup, error) {
+func (s *taskService) GetTaskGroupedByCategory(userId string) ([]dto.TaskByCategoryGroupResp, error) {
 	tasks, err := s.repo.GetTaskGroupedByCategory(userId)
 	if err != nil {
 		return nil, err
@@ -76,23 +81,52 @@ func (s *taskService) GetTaskGroupedByCategory(userId string) ([]model.TaskByCat
 	return tasks, nil
 }
 
-func (s *taskService) UpdateTask(id string, userId string, update map[string]interface{}) (model.Task, error) {
-	update["updated_at"] = int(time.Now().Unix())
-
-	updatedTask, err := s.repo.UpdateTask(id, userId, update)
+func (s *taskService) UpdateTask(id string, userId string, payload dto.ReqPatchTask) (dto.TaskResp, error) {
+	existingTask, err := s.repo.FindTask(id, userId)
 
 	if err != nil {
-		return model.Task{}, err
+		return dto.TaskResp{}, err
 	}
 
-	return updatedTask, nil
+	if payload.Title != nil {
+		existingTask.Title = *payload.Title
+	}
+
+	if payload.Description != nil {
+		existingTask.Description = *payload.Description
+	}
+
+	if payload.Priority != nil {
+		existingTask.Priority = *payload.Priority
+	}
+
+	if payload.Status != nil {
+		existingTask.Status = *payload.Status
+	}
+
+	if payload.CategoryId != nil {
+		existingTask.CategoryId = *payload.CategoryId
+	}
+
+	err = s.repo.UpdateTask(id, userId, existingTask)
+
+	if err != nil {
+		return dto.TaskResp{}, err
+	}
+
+	return existingTask.ToDTO(), nil
 
 }
 
-func (s *taskService) DeleteTask(id string, userId string) (model.Task, error) {
-	task, err := s.repo.DeleteTask(id, userId)
+func (s *taskService) DeleteTask(id string, userId string) (dto.TaskResp, error) {
+	existingTask, err := s.repo.FindTask(id, userId)
 	if err != nil {
-		return model.Task{}, err
+		return dto.TaskResp{}, err
 	}
-	return task, nil
+
+	err = s.repo.DeleteTask(id, userId)
+	if err != nil {
+		return dto.TaskResp{}, err
+	}
+	return existingTask.ToDTO(), nil
 }
