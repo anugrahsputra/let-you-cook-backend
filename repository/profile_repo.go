@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"errors"
+	"let-you-cook/domain/dto"
 	"let-you-cook/domain/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -11,9 +12,8 @@ import (
 
 type IProfileRepo interface {
 	CreateProfile(profile model.Profile) error
-	GetProfileByID(id string) (model.Profile, error)
 	GetProfileByAccountId(userId string) (model.Profile, error)
-	UpdateProfile(userId string, update map[string]interface{}) (model.Profile, error)
+	UpdateProfile(userId string, payload dto.ReqPatchProfile) error
 }
 
 type profileRepo struct {
@@ -41,19 +41,6 @@ func (r *profileRepo) CreateProfile(profile model.Profile) error {
 	return nil
 }
 
-func (r *profileRepo) GetProfileByID(id string) (model.Profile, error) {
-	collection := r.db.Collection("profiles")
-	var profile model.Profile
-	err := collection.FindOne(context.Background(), bson.M{"id": id}).Decode(&profile)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return profile, nil
-		}
-		return model.Profile{}, err
-	}
-	return profile, nil
-}
-
 func (r *profileRepo) GetProfileByAccountId(userId string) (model.Profile, error) {
 	collection := r.db.Collection("profiles")
 	var profile model.Profile
@@ -67,23 +54,17 @@ func (r *profileRepo) GetProfileByAccountId(userId string) (model.Profile, error
 	return profile, nil
 }
 
-func (r *profileRepo) UpdateProfile(userId string, update map[string]interface{}) (model.Profile, error) {
+func (r *profileRepo) UpdateProfile(userId string, payload dto.ReqPatchProfile) error {
 	collection := r.db.Collection("profiles")
 
 	_, err := collection.UpdateOne(
 		context.Background(),
 		bson.M{"id": userId},
-		bson.M{"$set": update},
+		bson.M{"$set": payload},
 	)
 	if err != nil {
-		return model.Profile{}, err
+		return err
 	}
 
-	var updatedProfile model.Profile
-	err = collection.FindOne(context.Background(), bson.M{"id": userId}).Decode(&updatedProfile)
-	if err != nil {
-		return model.Profile{}, err
-	}
-
-	return updatedProfile, nil
+	return nil
 }

@@ -76,7 +76,7 @@ func (h *ProfileHandler) GetProfileByAccountID(c *gin.Context) {
 func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 	userID := c.MustGet("user_id").(string)
 
-	var reqProfile map[string]interface{}
+	var reqProfile dto.ReqPatchProfile
 	if err := c.ShouldBindJSON(&reqProfile); err != nil {
 		c.JSON(http.StatusBadRequest, dto.Resp{
 			Status:  http.StatusBadRequest,

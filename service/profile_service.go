@@ -12,8 +12,8 @@ import (
 
 type IProfileService interface {
 	CreateProfile(userId string, email string, reqProfile dto.ReqProfile) error
-	GetProfileByAccountId(userId string) (model.Profile, error)
-	UpdateProfile(userId string, update map[string]interface{}) (model.Profile, error)
+	GetProfileByAccountId(userId string) (dto.ProfileResp, error)
+	UpdateProfile(userId string, payload dto.ReqPatchProfile) (dto.ProfileResp, error)
 }
 
 type profileService struct {
@@ -62,31 +62,45 @@ func (s *profileService) CreateProfile(userId string, email string, reqProfile d
 	return nil
 }
 
-func (s *profileService) GetProfileByAccountId(userId string) (model.Profile, error) {
+func (s *profileService) GetProfileByAccountId(userId string) (dto.ProfileResp, error) {
 	profile, err := s.repoProfile.GetProfileByAccountId(userId)
 	if err != nil {
-		return model.Profile{}, err
+		return dto.ProfileResp{}, err
 	}
-	return profile, nil
+	return profile.ToDTO(), nil
 
 }
 
-func (s *profileService) UpdateProfile(userId string, update map[string]interface{}) (model.Profile, error) {
-
+func (s *profileService) UpdateProfile(userId string, payload dto.ReqPatchProfile) (dto.ProfileResp, error) {
 	existingProfile, err := s.repoProfile.GetProfileByAccountId(userId)
 	if err != nil {
-		return model.Profile{}, err
-	}
-	if existingProfile.Id == "" {
-		return model.Profile{}, errors.New("profile not found")
+		return dto.ProfileResp{}, err
 	}
 
-	update["updated_at"] = int(time.Now().Unix())
+	if payload.Fullname != nil {
+		existingProfile.Fullname = *payload.Fullname
+	}
 
-	updatedProfile, err := s.repoProfile.UpdateProfile(existingProfile.Id, update)
+	if payload.Address != nil {
+		existingProfile.Address = *payload.Address
+	}
+
+	if payload.Phone != nil {
+		existingProfile.Phone = *payload.Phone
+	}
+
+	if payload.Bio != nil {
+		existingProfile.Bio = *payload.Bio
+	}
+
+	if payload.PhotoProfile != nil {
+		existingProfile.PhotoProfile = *payload.PhotoProfile
+	}
+
+	err = s.repoProfile.UpdateProfile(existingProfile.Id, payload)
 	if err != nil {
-		return model.Profile{}, err
+		return dto.ProfileResp{}, err
 	}
 
-	return updatedProfile, nil
+	return existingProfile.ToDTO(), nil
 }
