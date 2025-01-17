@@ -2,19 +2,22 @@ package service
 
 import (
 	"errors"
+	"let-you-cook/domain/dto"
 	"let-you-cook/domain/model"
 	"let-you-cook/repository"
 	"let-you-cook/utils/jwt"
 	"let-you-cook/utils/security"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/op/go-logging"
 )
 
 var logger = logging.MustGetLogger("main")
 
 type IAuthService interface {
-	Register(user model.User) error
-	Login(username, password string) (string, error)
+	Register(user dto.ReqUserRegister) (dto.UserResp, error)
+	Login(user dto.ReqUserLogin) (string, error)
 }
 
 type authService struct {
@@ -27,40 +30,45 @@ func NewAuthService(repo repository.IAuthRepo) *authService {
 	}
 }
 
-func (s *authService) Register(user model.User) error {
+func (s *authService) Register(user dto.ReqUserRegister) (dto.UserResp, error) {
 	exist, err := s.repo.GetUserExisting(user.Username)
 	if err != nil {
-		return err
-	}
-
-	if exist.Username != "" {
-		return errors.New("user already exist")
+		return exist.ToDTO(), err
 	}
 
 	hashedPassword, err := security.HashPassword(user.Password)
 	if err != nil {
-		return err
-	}
-	user.Password = hashedPassword
-	err = s.repo.RegisterRepo(user)
-	if err != nil {
-		return err
+		return exist.ToDTO(), err
 	}
 
-	return nil
+	newUser := model.User{
+		Id:        uuid.New().String(),
+		Username:  user.Username,
+		Password:  hashedPassword,
+		Email:     user.Email,
+		CreatedAt: int(time.Now().Unix()),
+		UpdatedAt: int(time.Now().Unix()),
+	}
+
+	err = s.repo.RegisterRepo(newUser)
+	if err != nil {
+		return dto.UserResp{}, err
+	}
+
+	return newUser.ToDTO(), nil
 }
 
-func (s *authService) Login(username, password string) (string, error) {
+func (s *authService) Login(user dto.ReqUserLogin) (string, error) {
 
-	user, err := s.repo.CheckUserExistingForLogin(username)
+	exist, err := s.repo.CheckUserExistingForLogin(user.Username)
 	if err != nil {
 		return "", err
 	}
 
-	if user.Username == "" || security.CheckPassword(user.Password, password) != nil {
+	if exist.Username == "" || security.CheckPassword(exist.Password, user.Password) != nil {
 		return "", errors.New("invalid credentials")
 	}
 
-	return jwt.GenerateToken(user)
+	return jwt.GenerateToken(exist)
 
 }

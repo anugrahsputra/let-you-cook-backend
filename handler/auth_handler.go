@@ -2,13 +2,10 @@ package handler
 
 import (
 	"let-you-cook/domain/dto"
-	"let-you-cook/domain/model"
 	"let-you-cook/service"
 	"let-you-cook/utils/validator"
-	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 type AuthHandler struct {
@@ -22,7 +19,7 @@ func NewAuthHandler(authService service.IAuthService) *AuthHandler {
 }
 
 func (h *AuthHandler) Register(c *gin.Context) {
-	var reqUser dto.ReqRegister
+	var reqUser dto.ReqUserRegister
 	if err := c.ShouldBindJSON(&reqUser); err != nil {
 		c.JSON(400, dto.Resp{
 			Status:  400,
@@ -42,16 +39,9 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	user := model.User{
-		Id:        uuid.New().String(),
-		Username:  reqUser.Username,
-		Password:  reqUser.Password,
-		Email:     reqUser.Email,
-		CreatedAt: int(time.Now().Unix()),
-		UpdatedAt: int(time.Now().Unix()),
-	}
+	user, err := h.authService.Register(reqUser)
 
-	if err := h.authService.Register(user); err != nil {
+	if err != nil {
 		c.JSON(400, dto.Resp{
 			Status:  400,
 			Message: err.Error(),
@@ -68,7 +58,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 }
 
 func (h *AuthHandler) Login(c *gin.Context) {
-	var req dto.ReqLogin
+	var req dto.ReqUserLogin
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, dto.Resp{
 			Status:  400,
@@ -87,7 +77,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	token, err := h.authService.Login(req.Username, req.Password)
+	token, err := h.authService.Login(req)
 	if err != nil {
 		c.JSON(400, dto.Resp{
 			Status:  400,

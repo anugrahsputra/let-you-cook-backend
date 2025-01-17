@@ -13,6 +13,7 @@ type User struct {
 
 func (user *User) ToDTO() dto.UserResp {
 	return dto.UserResp{
+		Id:       user.Id,
 		Username: user.Username,
 		Email:    user.Email,
 	}
