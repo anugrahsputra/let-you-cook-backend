@@ -12,7 +12,6 @@ func SessionRoute(r *gin.RouterGroup, sessionHandler *handler.SessionHandler) {
 	{
 		sessionRoutes.GET("", sessionHandler.GetAllSessions)
 		sessionRoutes.POST("", sessionHandler.CreateSession)
-		sessionRoutes.POST("/start/:id", sessionHandler.StartSession)
-		sessionRoutes.POST("/end/:id", sessionHandler.EndSession)
+		sessionRoutes.PATCH("/:id", sessionHandler.UpdateSession)
 	}
 }

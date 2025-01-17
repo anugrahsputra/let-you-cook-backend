@@ -1,5 +1,9 @@
 package model
 
+import (
+	"let-you-cook/domain/dto"
+)
+
 type PomodoroSession struct {
 	Id            string `json:"id" bson:"id"`
 	UserId        string `json:"user_id" bson:"user_id"`
@@ -12,4 +16,16 @@ type PomodoroSession struct {
 	BreakDuration int    `json:"break_duration" bson:"break_duration"`
 	CreatedAt     int    `json:"created_at" bson:"created_at"`
 	UpdatedAt     int    `json:"updated_at" bson:"updated_at"`
+}
+
+func (session *PomodoroSession) ToDTO() dto.PomodoroSessionResp {
+	return dto.PomodoroSessionResp{
+		Name:          session.Name,
+		TaskId:        session.TaskId,
+		StartTime:     session.StartTime,
+		EndTime:       session.EndTime,
+		Status:        session.Status,
+		FocusDuration: session.FocusDuration,
+		BreakDuration: session.BreakDuration,
+	}
 }

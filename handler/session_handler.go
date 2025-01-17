@@ -68,7 +68,7 @@ func (h *SessionHandler) CreateSession(c *gin.Context) {
 	})
 }
 
-func (h *SessionHandler) StartSession(c *gin.Context) {
+func (h *SessionHandler) UpdateSession(c *gin.Context) {
 	userId := c.MustGet(USER_ID).(string)
 	id := c.Param("id")
 
@@ -81,37 +81,16 @@ func (h *SessionHandler) StartSession(c *gin.Context) {
 		return
 	}
 
-	err := h.sessionService.StartSession(id, userId)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
-			Status:  http.StatusInternalServerError,
-			Message: err.Error(),
-			Data:    nil,
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, dto.Resp{
-		Status:  http.StatusOK,
-		Message: "session started",
-		Data:    nil,
-	})
-}
-
-func (h *SessionHandler) EndSession(c *gin.Context) {
-	userId := c.MustGet(USER_ID).(string)
-	id := c.Param("id")
-
-	if id == "" {
+	var req dto.ReqPatchSession
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, dto.Resp{
 			Status:  http.StatusBadRequest,
-			Message: "id is required",
+			Message: err.Error(),
 			Data:    nil,
 		})
 		return
 	}
-
-	err := h.sessionService.EndSession(id, userId)
+	session, err := h.sessionService.UpdateSession(id, userId, req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.Resp{
 			Status:  http.StatusInternalServerError,
@@ -123,8 +102,8 @@ func (h *SessionHandler) EndSession(c *gin.Context) {
 
 	c.JSON(http.StatusOK, dto.Resp{
 		Status:  http.StatusOK,
-		Message: "session ended",
-		Data:    nil,
+		Message: "session updated",
+		Data:    session,
 	})
 }
 

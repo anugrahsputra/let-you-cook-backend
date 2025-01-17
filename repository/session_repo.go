@@ -20,9 +20,11 @@ const (
 
 type ISessionRepo interface {
 	CreateSession(session model.PomodoroSession) error
+	UpdateSession(id string, userId string, payload model.PomodoroSession) error
 	StartSession(id string, userId string) error
 	EndSession(id string, userId string) error
 	GetAllSessions(useId string) ([]model.PomodoroSession, error)
+	GetSessionById(id string, userId string) (model.PomodoroSession, error)
 }
 
 type sessionRepo struct {
@@ -57,6 +59,20 @@ func (r *sessionRepo) CreateSession(session model.PomodoroSession) error {
 	}
 
 	_, err = collection.InsertOne(context.Background(), session)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *sessionRepo) UpdateSession(id string, userId string, payload model.PomodoroSession) error {
+	collection := r.db.Collection(collectionName)
+
+	filter := bson.M{fieldId: id, fieldUserId: userId}
+	update := bson.M{"$set": payload}
+
+	_, err := collection.UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		return err
 	}
@@ -127,4 +143,19 @@ func (r *sessionRepo) GetAllSessions(userId string) ([]model.PomodoroSession, er
 		return nil, err
 	}
 	return sessions, nil
+}
+
+func (r *sessionRepo) GetSessionById(id string, userId string) (model.PomodoroSession, error) {
+	collection := r.db.Collection(collectionName)
+
+	var session model.PomodoroSession
+	err := collection.FindOne(context.Background(), bson.M{fieldId: id, fieldUserId: userId}).Decode(&session)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return model.PomodoroSession{}, errors.New("session not found or unauthorized")
+		}
+		return model.PomodoroSession{}, err
+	}
+	return session, nil
 }
