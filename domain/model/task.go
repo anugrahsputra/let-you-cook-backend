@@ -1,5 +1,9 @@
 package model
 
+import (
+	"let-you-cook/domain/dto"
+)
+
 type Task struct {
 	Id          string   `json:"id" bson:"id"`
 	UserId      string   `json:"user_id" bson:"user_id"`
@@ -14,8 +18,13 @@ type Task struct {
 	Tags        []string `json:"tags" bson:"tags"`
 }
 
-type TaskByCategoryGroup struct {
-	CategoryId   string `json:"category_id" bson:"category_id"`
-	CategoryName string `json:"category_name" bson:"category_name"`
-	Tasks        []Task `json:"tasks" bson:"tasks"`
+func (t *Task) ToDTO() dto.TaskResp {
+	return dto.TaskResp{
+		Title:       t.Title,
+		Description: t.Description,
+		CategoryId:  t.CategoryId,
+		Status:      t.Status,
+		Priority:    t.Priority,
+		Tags:        t.Tags,
+	}
 }
