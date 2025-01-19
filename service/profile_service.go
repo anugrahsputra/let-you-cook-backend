@@ -72,11 +72,22 @@ func (s *profileService) GetProfileByAccountId(userId string) (dto.ProfileResp, 
 }
 
 func (s *profileService) UpdateProfile(userId string, payload dto.ReqPatchProfile) (dto.ProfileResp, error) {
-	existingProfile, err := s.repoProfile.GetProfileByAccountId(userId)
+	profile, err := s.repoProfile.GetProfileByAccountId(userId)
 	if err != nil {
 		return dto.ProfileResp{}, err
 	}
 
+	applyProfilePatch(&profile, payload)
+
+	err = s.repoProfile.UpdateProfile(userId, profile)
+	if err != nil {
+		return dto.ProfileResp{}, err
+	}
+
+	return profile.ToDTO(), nil
+}
+
+func applyProfilePatch(existingProfile *model.Profile, payload dto.ReqPatchProfile) {
 	if payload.Fullname != nil {
 		existingProfile.Fullname = *payload.Fullname
 	}
@@ -96,11 +107,4 @@ func (s *profileService) UpdateProfile(userId string, payload dto.ReqPatchProfil
 	if payload.PhotoProfile != nil {
 		existingProfile.PhotoProfile = *payload.PhotoProfile
 	}
-
-	err = s.repoProfile.UpdateProfile(existingProfile.Id, payload)
-	if err != nil {
-		return dto.ProfileResp{}, err
-	}
-
-	return existingProfile.ToDTO(), nil
 }
