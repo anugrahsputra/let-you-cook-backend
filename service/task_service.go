@@ -88,6 +88,30 @@ func (s *taskService) UpdateTask(id string, userId string, payload dto.ReqPatchT
 		return dto.TaskResp{}, err
 	}
 
+	applyTaskPatch(&existingTask, payload)
+	err = s.repo.UpdateTask(id, userId, existingTask)
+	if err != nil {
+		return dto.TaskResp{}, err
+	}
+
+	return existingTask.ToDTO(), nil
+
+}
+
+func (s *taskService) DeleteTask(id string, userId string) (dto.TaskResp, error) {
+	existingTask, err := s.repo.FindTask(id, userId)
+	if err != nil {
+		return dto.TaskResp{}, err
+	}
+
+	err = s.repo.DeleteTask(id, userId)
+	if err != nil {
+		return dto.TaskResp{}, err
+	}
+	return existingTask.ToDTO(), nil
+}
+
+func applyTaskPatch(existingTask *model.Task, payload dto.ReqPatchTask) {
 	if payload.Title != nil {
 		existingTask.Title = *payload.Title
 	}
@@ -108,25 +132,4 @@ func (s *taskService) UpdateTask(id string, userId string, payload dto.ReqPatchT
 		existingTask.CategoryId = *payload.CategoryId
 	}
 
-	err = s.repo.UpdateTask(id, userId, existingTask)
-
-	if err != nil {
-		return dto.TaskResp{}, err
-	}
-
-	return existingTask.ToDTO(), nil
-
-}
-
-func (s *taskService) DeleteTask(id string, userId string) (dto.TaskResp, error) {
-	existingTask, err := s.repo.FindTask(id, userId)
-	if err != nil {
-		return dto.TaskResp{}, err
-	}
-
-	err = s.repo.DeleteTask(id, userId)
-	if err != nil {
-		return dto.TaskResp{}, err
-	}
-	return existingTask.ToDTO(), nil
 }

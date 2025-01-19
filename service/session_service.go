@@ -56,27 +56,11 @@ func (s *sessionService) CreateSession(userId string, req dto.ReqCreateSession) 
 
 func (s *sessionService) UpdateSession(id string, userId string, payload dto.ReqPatchSession) (dto.PomodoroSessionResp, error) {
 	session, err := s.repoSession.GetSessionById(id, userId)
-
 	if err != nil {
 		return dto.PomodoroSessionResp{}, err
 	}
 
-	if payload.Name != nil {
-		session.Name = *payload.Name
-	}
-
-	if payload.Status != nil {
-		session.Status = *payload.Status
-	}
-
-	if payload.StartTime != nil {
-		session.StartTime = *payload.StartTime
-	}
-
-	if payload.EndTime != nil {
-		session.EndTime = *payload.EndTime
-	}
-
+	applySessionPatch(&session, payload)
 	err = s.repoSession.UpdateSession(id, userId, session)
 	if err != nil {
 		return dto.PomodoroSessionResp{}, err
@@ -97,4 +81,23 @@ func (s *sessionService) GetAllSessions(userId string) ([]dto.PomodoroSessionRes
 	}
 
 	return sessionResp, nil
+}
+
+func applySessionPatch(session *model.PomodoroSession, payload dto.ReqPatchSession) {
+
+	if payload.Name != nil {
+		session.Name = *payload.Name
+	}
+
+	if payload.Status != nil {
+		session.Status = *payload.Status
+	}
+
+	if payload.StartTime != nil {
+		session.StartTime = *payload.StartTime
+	}
+
+	if payload.EndTime != nil {
+		session.EndTime = *payload.EndTime
+	}
 }
