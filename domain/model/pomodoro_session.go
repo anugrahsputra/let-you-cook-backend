@@ -20,6 +20,7 @@ type PomodoroSession struct {
 
 func (session *PomodoroSession) ToDTO() dto.PomodoroSessionResp {
 	return dto.PomodoroSessionResp{
+		Id:            session.Id,
 		Name:          session.Name,
 		TaskId:        session.TaskId,
 		StartTime:     session.StartTime,

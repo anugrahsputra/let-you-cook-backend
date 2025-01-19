@@ -23,6 +23,7 @@ type ReqPatchSession struct {
 }
 
 type PomodoroSessionResp struct {
+	Id            string `json:"id" bson:"id"`
 	Name          string `json:"name" bson:"name"`
 	TaskId        string `json:"task_id" bson:"task_id"`
 	StartTime     int    `json:"start_time" bson:"start_time"`
