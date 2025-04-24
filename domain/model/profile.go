@@ -17,6 +17,7 @@ type Profile struct {
 
 func (profile *Profile) ToDTO() dto.ProfileResp {
 	return dto.ProfileResp{
+		Id:           profile.Id,
 		Fullname:     profile.Fullname,
 		Address:      profile.Address,
 		Phone:        profile.Phone,

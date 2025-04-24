@@ -17,6 +17,7 @@ type ReqPatchProfile struct {
 }
 
 type ProfileResp struct {
+	Id           string `json:"id" bson:"id"`
 	Fullname     string `json:"fullname" bson:"fullname"`
 	Address      string `json:"address" bson:"address"`
 	Phone        string `json:"phone" bson:"phone"`
