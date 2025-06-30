@@ -102,7 +102,9 @@ All endpoints are prefixed with `/api/v1`.
 
 ### Pomodoro Sessions
 
-- `POST /session`: Create a new Pomodoro session.
+- `POST /session/create`: Create a new Pomodoro session.
+- `PATCH /session/start/:id`: Start a Pomodoro session.
+- `PATCH /session/end/:id`: End a Pomodoro session.
 - `GET /session`: Get all Pomodoro sessions for the logged-in user.
 - `PATCH /session/:id`: Update a Pomodoro session.
 
