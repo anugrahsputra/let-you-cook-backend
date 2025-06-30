@@ -12,6 +12,8 @@ import (
 type ISessionService interface {
 	CreateSession(userId string, req dto.ReqCreateSession) error
 	UpdateSession(id string, userId string, payload dto.ReqPatchSession) (dto.PomodoroSessionResp, error)
+	StartSession(id string, userId string) (dto.PomodoroSessionResp, error)
+	EndSession(id string, userId string) (dto.PomodoroSessionResp, error)
 	GetAllSessions(userId string) ([]dto.PomodoroSessionResp, error)
 }
 
@@ -81,6 +83,50 @@ func (s *sessionService) GetAllSessions(userId string) ([]dto.PomodoroSessionRes
 	}
 
 	return sessionResp, nil
+}
+
+func (s *sessionService) StartSession(id string, userId string) (dto.PomodoroSessionResp, error) {
+	session, err := s.repoSession.GetSessionById(id, userId)
+	if err != nil {
+		return dto.PomodoroSessionResp{}, err
+	}
+
+	if session.Status != "PENDING" {
+		return dto.PomodoroSessionResp{}, nil // or an error indicating the session cannot be started
+	}
+
+	session.Status = "ACTIVE"
+	session.StartTime = int(time.Now().Unix())
+	session.UpdatedAt = int(time.Now().Unix())
+
+	err = s.repoSession.StartSession(id, userId)
+	if err != nil {
+		return dto.PomodoroSessionResp{}, err
+	}
+
+	return session.ToDTO(), nil
+}
+
+func (s *sessionService) EndSession(id string, userId string) (dto.PomodoroSessionResp, error) {
+	session, err := s.repoSession.GetSessionById(id, userId)
+	if err != nil {
+		return dto.PomodoroSessionResp{}, err
+	}
+
+	if session.Status != "ACTIVE" {
+		return dto.PomodoroSessionResp{}, nil // or an error indicating the session cannot be ended
+	}
+
+	session.Status = "COMPLETED"
+	session.EndTime = int(time.Now().Unix())
+	session.UpdatedAt = int(time.Now().Unix())
+
+	err = s.repoSession.EndSession(id, userId)
+	if err != nil {
+		return dto.PomodoroSessionResp{}, err
+	}
+
+	return session.ToDTO(), nil
 }
 
 func applySessionPatch(session *model.PomodoroSession, payload dto.ReqPatchSession) {

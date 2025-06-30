@@ -23,7 +23,7 @@ func (h *TaskHandler) CreateTask(c *gin.Context) {
 	var reqTask dto.ReqTask
 
 	if err := c.ShouldBindJSON(&reqTask); err != nil {
-		c.JSON(http.StatusBadRequest, dto.Resp{
+		c.JSON(http.StatusBadRequest, dto.Response{
 			Status:  http.StatusBadRequest,
 			Message: err.Error(),
 			Data:    nil,
@@ -32,7 +32,7 @@ func (h *TaskHandler) CreateTask(c *gin.Context) {
 	}
 
 	if err := h.taskService.CreateTask(userId, reqTask); err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 			Data:    nil,
@@ -40,7 +40,7 @@ func (h *TaskHandler) CreateTask(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "task created success",
 		Data:    nil,
@@ -52,7 +52,7 @@ func (h *TaskHandler) GetTasks(c *gin.Context) {
 
 	tasks, err := h.taskService.GetTasks(userId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 			Data:    nil,
@@ -60,7 +60,7 @@ func (h *TaskHandler) GetTasks(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "success",
 		Data:    tasks,
@@ -73,7 +73,7 @@ func (h *TaskHandler) GetTaskGroupedByCategory(c *gin.Context) {
 
 	taskByCategoryGroup, err := h.taskService.GetTaskGroupedByCategory(userId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 			Data:    nil,
@@ -81,7 +81,7 @@ func (h *TaskHandler) GetTaskGroupedByCategory(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "success",
 		Data:    taskByCategoryGroup,
@@ -93,7 +93,7 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 	userId := c.MustGet("user_id").(string)
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, dto.Resp{
+		c.JSON(http.StatusBadRequest, dto.Response{
 			Status:  http.StatusBadRequest,
 			Message: "id is required",
 			Data:    nil,
@@ -104,7 +104,7 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 	var reqTask dto.ReqPatchTask
 
 	if err := c.ShouldBindJSON(&reqTask); err != nil {
-		c.JSON(http.StatusBadRequest, dto.Resp{
+		c.JSON(http.StatusBadRequest, dto.Response{
 			Status:  http.StatusBadRequest,
 			Message: err.Error(),
 			Data:    nil,
@@ -114,7 +114,7 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 
 	task, err := h.taskService.UpdateTask(id, userId, reqTask)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 			Data:    nil,
@@ -122,7 +122,7 @@ func (h *TaskHandler) UpdateTask(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "task updated success",
 		Data:    task,
@@ -134,7 +134,7 @@ func (h *TaskHandler) DeleteTask(c *gin.Context) {
 	userId := c.MustGet("user_id").(string)
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, dto.Resp{
+		c.JSON(http.StatusBadRequest, dto.Response{
 			Status:  http.StatusBadRequest,
 			Message: "id is required",
 		})
@@ -143,14 +143,14 @@ func (h *TaskHandler) DeleteTask(c *gin.Context) {
 
 	_, err := h.taskService.DeleteTask(id, userId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "task deleted success",
 	})

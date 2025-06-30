@@ -23,7 +23,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	var reqCategory dto.ReqCategory
 
 	if err := c.ShouldBindJSON(&reqCategory); err != nil {
-		c.JSON(http.StatusBadRequest, dto.Resp{
+		c.JSON(http.StatusBadRequest, dto.Response{
 			Status:  http.StatusBadRequest,
 			Message: err.Error(),
 			Data:    nil,
@@ -32,7 +32,7 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	}
 
 	if reqCategory.Name == "" {
-		c.JSON(http.StatusBadRequest, dto.Resp{
+		c.JSON(http.StatusBadRequest, dto.Response{
 			Status:  http.StatusBadRequest,
 			Message: "category name cannot be empty",
 			Data:    nil,
@@ -41,14 +41,14 @@ func (h *CategoryHandler) CreateCategory(c *gin.Context) {
 	}
 
 	if err := h.categoryService.CreateCategory(userId, reqCategory); err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 			Data:    nil,
 		})
 		return
 	}
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "category created succes",
 		Data:    nil,
@@ -67,7 +67,7 @@ func (h CategoryHandler) GetCategories(c *gin.Context) {
 
 	categories, err := h.categoryService.GetCategories(userId, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 			Data:    nil,
@@ -75,7 +75,7 @@ func (h CategoryHandler) GetCategories(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "category created succes",
 		Data:    categories,
@@ -87,7 +87,7 @@ func (h *CategoryHandler) GetCategoryById(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, dto.Resp{
+		c.JSON(http.StatusBadRequest, dto.Response{
 			Status:  http.StatusBadRequest,
 			Message: "id is required",
 			Data:    nil,
@@ -97,7 +97,7 @@ func (h *CategoryHandler) GetCategoryById(c *gin.Context) {
 
 	category, err := h.categoryService.GetCategoryById(id, userId)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 			Data:    nil,
@@ -105,7 +105,7 @@ func (h *CategoryHandler) GetCategoryById(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "success",
 		Data:    category,
@@ -117,7 +117,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, dto.Resp{
+		c.JSON(http.StatusBadRequest, dto.Response{
 			Status:  http.StatusBadRequest,
 			Message: "id is required",
 			Data:    nil,
@@ -127,7 +127,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 
 	var reqUpdateCategory dto.ReqPatchCategory
 	if err := c.ShouldBindJSON(&reqUpdateCategory); err != nil {
-		c.JSON(http.StatusBadRequest, dto.Resp{
+		c.JSON(http.StatusBadRequest, dto.Response{
 			Status:  http.StatusBadRequest,
 			Message: err.Error(),
 			Data:    nil,
@@ -137,7 +137,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 
 	category, err := h.categoryService.UpdateCategory(id, userId, reqUpdateCategory)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 			Data:    nil,
@@ -145,7 +145,7 @@ func (h *CategoryHandler) UpdateCategory(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "category updated success",
 		Data:    category,
@@ -158,7 +158,7 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.JSON(http.StatusBadRequest, dto.Resp{
+		c.JSON(http.StatusBadRequest, dto.Response{
 			Status:  http.StatusBadRequest,
 			Message: "id is required",
 			Data:    nil,
@@ -167,7 +167,7 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 	}
 
 	if _, err := h.categoryService.DeleteCategory(id, userId); err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 			Data:    nil,
@@ -175,7 +175,7 @@ func (h *CategoryHandler) DeleteCategory(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "category deleted success",
 		Data:    nil,

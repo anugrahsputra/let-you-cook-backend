@@ -21,7 +21,7 @@ func NewAuthHandler(authService service.IAuthService) *AuthHandler {
 func (h *AuthHandler) Register(c *gin.Context) {
 	var reqUser dto.ReqUserRegister
 	if err := c.ShouldBindJSON(&reqUser); err != nil {
-		c.JSON(400, dto.Resp{
+		c.JSON(400, dto.Response{
 			Status:  400,
 			Message: err.Error(),
 			Data:    nil,
@@ -31,7 +31,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 
 	validationError := validator.ValidateStruct(reqUser)
 	if validationError != nil {
-		c.JSON(400, dto.Resp{
+		c.JSON(400, dto.Response{
 			Status:  400,
 			Message: "invalid request body",
 			Data:    nil,
@@ -42,7 +42,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	user, err := h.authService.Register(reqUser)
 
 	if err != nil {
-		c.JSON(400, dto.Resp{
+		c.JSON(400, dto.Response{
 			Status:  400,
 			Message: err.Error(),
 			Data:    nil,
@@ -50,7 +50,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, dto.Resp{
+	c.JSON(200, dto.Response{
 		Status:  200,
 		Message: "Register Success",
 		Data:    user,
@@ -60,7 +60,7 @@ func (h *AuthHandler) Register(c *gin.Context) {
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req dto.ReqUserLogin
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, dto.Resp{
+		c.JSON(400, dto.Response{
 			Status:  400,
 			Message: err.Error(),
 			Data:    nil,
@@ -69,7 +69,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 	validationError := validator.ValidateStruct(req)
 	if validationError != nil {
-		c.JSON(400, dto.Resp{
+		c.JSON(400, dto.Response{
 			Status:  400,
 			Message: "invalid request body",
 			Data:    nil,
@@ -79,7 +79,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	token, err := h.authService.Login(req)
 	if err != nil {
-		c.JSON(400, dto.Resp{
+		c.JSON(400, dto.Response{
 			Status:  400,
 			Message: err.Error(),
 			Data:    nil,
@@ -87,12 +87,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	c.Header("Authorization", token)
+	// c.Header("Authorization", token)
 
-	c.JSON(200, dto.Resp{
+	c.JSON(200, dto.Response{
 		Status:  200,
 		Message: "Login Success",
-		Data:    nil,
-	})
+		Data: map[string]string{
+			"token": token,
+		}})
 
 }

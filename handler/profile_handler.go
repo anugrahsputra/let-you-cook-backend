@@ -28,7 +28,7 @@ func (h *ProfileHandler) CreateProfile(c *gin.Context) {
 	var reqProfile dto.ReqProfile
 	err := c.ShouldBindJSON(&reqProfile)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.Resp{
+		c.JSON(http.StatusBadRequest, dto.Response{
 			Status:  http.StatusBadRequest,
 			Message: err.Error(),
 			Data:    nil,
@@ -38,7 +38,7 @@ func (h *ProfileHandler) CreateProfile(c *gin.Context) {
 
 	err = h.profileService.CreateProfile(userID, email, reqProfile)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 			Data:    nil,
@@ -46,7 +46,7 @@ func (h *ProfileHandler) CreateProfile(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "success",
 		Data:    nil,
@@ -58,7 +58,7 @@ func (h *ProfileHandler) GetProfileByAccountID(c *gin.Context) {
 
 	profile, err := h.profileService.GetProfileByAccountId(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 			Data:    nil,
@@ -66,7 +66,7 @@ func (h *ProfileHandler) GetProfileByAccountID(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "success",
 		Data:    profile,
@@ -78,7 +78,7 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 
 	var reqProfile dto.ReqPatchProfile
 	if err := c.ShouldBindJSON(&reqProfile); err != nil {
-		c.JSON(http.StatusBadRequest, dto.Resp{
+		c.JSON(http.StatusBadRequest, dto.Response{
 			Status:  http.StatusBadRequest,
 			Message: err.Error(),
 			Data:    nil,
@@ -87,7 +87,7 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 	}
 	profile, err := h.profileService.UpdateProfile(userID, reqProfile)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Resp{
+		c.JSON(http.StatusInternalServerError, dto.Response{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
 			Data:    nil,
@@ -95,7 +95,7 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "profile updated success",
 		Data:    profile,

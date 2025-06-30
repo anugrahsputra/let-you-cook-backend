@@ -21,7 +21,7 @@ func NewUserHandler(userService service.IUserService) *UserHandler {
 func (h *UserHandler) GetUsers(c *gin.Context) {
 	users, err := h.userService.GetAllUsers()
 	if err != nil {
-		c.JSON(http.StatusForbidden, dto.Resp{
+		c.JSON(http.StatusForbidden, dto.Response{
 			Status:  http.StatusForbidden,
 			Message: err.Error(),
 			Data:    nil,
@@ -29,7 +29,7 @@ func (h *UserHandler) GetUsers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, dto.Resp{
+	c.JSON(http.StatusOK, dto.Response{
 		Status:  http.StatusOK,
 		Message: "success",
 		Data:    users,

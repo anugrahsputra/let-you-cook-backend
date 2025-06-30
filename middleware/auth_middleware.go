@@ -14,7 +14,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		token := c.Request.Header.Get("Authorization")
 
 		if token == "" {
-			c.JSON(http.StatusUnauthorized, dto.Resp{
+			c.JSON(http.StatusUnauthorized, dto.Response{
 				Status:  http.StatusUnauthorized,
 				Message: "unauthorized",
 				Data:    nil,
@@ -28,7 +28,7 @@ func AuthMiddleware() gin.HandlerFunc {
 		user, err := jwt.ParseToken(token)
 
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, dto.Resp{
+			c.JSON(http.StatusUnauthorized, dto.Response{
 				Status:  http.StatusUnauthorized,
 				Message: "unauthorized",
 				Data:    nil,
