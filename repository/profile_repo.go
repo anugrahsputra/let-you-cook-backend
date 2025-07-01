@@ -47,7 +47,7 @@ func (r *profileRepo) GetProfileByAccountId(userId string) (model.Profile, error
 	err := collection.FindOne(context.Background(), bson.M{"user_id": userId}).Decode(&profile)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return model.Profile{}, nil
+			return model.Profile{}, errors.New("profile not found")
 		}
 		return model.Profile{}, err
 	}

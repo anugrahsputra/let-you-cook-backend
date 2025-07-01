@@ -37,7 +37,7 @@ func (s *userService) GetAllUsers() ([]dto.UserResp, error) {
 func (s *userService) GetUserById(userId string) (dto.UserResp, error) {
 	user, err := s.repo.GetUserById(userId)
 	if err != nil {
-		return user.ToDTO(), err
+		return dto.UserResp{}, err
 	}
 	return user.ToDTO(), nil
 }

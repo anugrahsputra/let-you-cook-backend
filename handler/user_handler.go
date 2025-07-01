@@ -21,10 +21,9 @@ func NewUserHandler(userService service.IUserService) *UserHandler {
 func (h *UserHandler) GetUsers(c *gin.Context) {
 	users, err := h.userService.GetAllUsers()
 	if err != nil {
-		c.JSON(http.StatusForbidden, dto.Response{
+		c.JSON(http.StatusForbidden, dto.ErrorResponse{
 			Status:  http.StatusForbidden,
 			Message: err.Error(),
-			Data:    nil,
 		})
 		return
 	}
@@ -41,9 +40,16 @@ func (h *UserHandler) GetUserByID(c *gin.Context) {
 
 	user, err := h.userService.GetUserById(userID)
 	if err != nil {
-		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
+		c.JSON(http.StatusForbidden, dto.ErrorResponse{
+			Status:  http.StatusForbidden,
+			Message: err.Error(),
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"user": user})
+	c.JSON(http.StatusOK, dto.Response{
+		Status:  http.StatusOK,
+		Message: "success",
+		Data:    user,
+	})
 }

@@ -33,11 +33,12 @@ func NewUserRepo(db *mongo.Database, indexRepo *IndexRepo) *userRepo {
 
 func (r *userRepo) GetUserById(id string) (model.User, error) {
 	collection := r.db.Collection("users")
+
 	var user model.User
 	err := collection.FindOne(context.Background(), bson.M{"id": id}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			return user, nil
+			return user, errors.New("User not found")
 		}
 		return model.User{}, err
 	}

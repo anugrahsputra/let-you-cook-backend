@@ -49,7 +49,7 @@ func (s *profileService) CreateProfile(userId string, email string, reqProfile d
 		Email:        email,
 		Phone:        reqProfile.Phone,
 		Bio:          reqProfile.Bio,
-		PhotoProfile: reqProfile.PhotoProfile,
+		PhotoProfile: "https://api.dicebear.com/9.x/lorelei/svg",
 		UpdatedAt:    int(time.Now().Unix()),
 		CreatedAt:    int(time.Now().Unix()),
 	}

@@ -28,20 +28,18 @@ func (h *ProfileHandler) CreateProfile(c *gin.Context) {
 	var reqProfile dto.ReqProfile
 	err := c.ShouldBindJSON(&reqProfile)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.Response{
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Status:  http.StatusBadRequest,
 			Message: err.Error(),
-			Data:    nil,
 		})
 		return
 	}
 
 	err = h.profileService.CreateProfile(userID, email, reqProfile)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Response{
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
-			Data:    nil,
 		})
 		return
 	}
@@ -58,10 +56,9 @@ func (h *ProfileHandler) GetProfileByAccountID(c *gin.Context) {
 
 	profile, err := h.profileService.GetProfileByAccountId(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.Response{
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Status:  http.StatusInternalServerError,
 			Message: err.Error(),
-			Data:    nil,
 		})
 		return
 	}
