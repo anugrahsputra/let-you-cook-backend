@@ -37,8 +37,8 @@ func (h *ProfileHandler) CreateProfile(c *gin.Context) {
 
 	err = h.profileService.CreateProfile(userID, email, reqProfile)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Status:  http.StatusInternalServerError,
+		c.JSON(http.StatusConflict, dto.ErrorResponse{
+			Status:  http.StatusConflict,
 			Message: err.Error(),
 		})
 		return
@@ -56,8 +56,8 @@ func (h *ProfileHandler) GetProfileByAccountID(c *gin.Context) {
 
 	profile, err := h.profileService.GetProfileByAccountId(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
-			Status:  http.StatusInternalServerError,
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{
+			Status:  http.StatusNotFound,
 			Message: err.Error(),
 		})
 		return
