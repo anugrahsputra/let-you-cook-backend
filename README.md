@@ -83,6 +83,7 @@ All endpoints are prefixed with `/api/v1`.
 - `POST /profile`: Create a user profile.
 - `GET /profile`: Get the profile of the logged-in user.
 - `PATCH /profile`: Update the profile of the logged-in user.
+- `PATCH /profile/upload`: Upload/update the profile picture of the logged-in user.
 
 ### Tasks
 

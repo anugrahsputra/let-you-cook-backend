@@ -98,3 +98,31 @@ func (h *ProfileHandler) UpdateProfile(c *gin.Context) {
 		Data:    profile,
 	})
 }
+
+func (h *ProfileHandler) UploadProfilePicture(c *gin.Context) {
+	userID := c.MustGet("user_id").(string)
+
+	file, err := c.FormFile("photo_profile")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Status:  http.StatusBadRequest,
+			Message: "photo_profile is required",
+		})
+		return
+	}
+
+	profile, err := h.profileService.UploadProfilePicture(userID, file)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.Response{
+		Status:  http.StatusOK,
+		Message: "success",
+		Data:    profile,
+	})
+}

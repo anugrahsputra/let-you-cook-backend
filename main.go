@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"let-you-cook/config"
 	"let-you-cook/router"
+	minio_util "let-you-cook/utils/minio"
 
 	"github.com/joho/godotenv"
 )
@@ -15,7 +16,7 @@ func init() {
 	}
 
 	config.ConfigureLogger()
-	config.InitializeMinioClient()
+	minio_util.InitMinio()
 }
 
 func main() {

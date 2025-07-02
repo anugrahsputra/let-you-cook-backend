@@ -13,5 +13,6 @@ func ProfileRoute(r *gin.RouterGroup, profileHandler *handler.ProfileHandler) {
 		profileRoutes.POST("", profileHandler.CreateProfile)
 		profileRoutes.GET("", profileHandler.GetProfileByAccountID)
 		profileRoutes.PATCH("", profileHandler.UpdateProfile)
+		profileRoutes.PATCH("/upload", profileHandler.UploadProfilePicture)
 	}
 }
