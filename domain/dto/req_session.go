@@ -18,6 +18,7 @@ type ReqEndSession struct {
 type ReqPatchSession struct {
 	Name      *string `json:"name" bson:"name" binding:"omitempty"`
 	Status    *string `json:"status" bson:"status" binding:"omitempty"`
+	TaskId    *string `json:"task_id" bson:"task_id" binding:"omitempty"`
 	StartTime *int    `json:"start_time" bson:"start_time" binding:"omitempty"`
 	EndTime   *int    `json:"end_time" bson:"end_time" binding:"omitempty"`
 }

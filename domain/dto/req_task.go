@@ -19,6 +19,7 @@ type ReqPatchTask struct {
 }
 
 type TaskResp struct {
+	Id          string   `json:"id" bson:"id"`
 	Title       string   `json:"title" bson:"title"`
 	Description string   `json:"description" bson:"description"`
 	CategoryId  string   `json:"category_id" bson:"category_id"`

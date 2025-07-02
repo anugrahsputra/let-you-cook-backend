@@ -33,17 +33,16 @@ func NewProfileService(repoProfile repository.IProfileRepo, repoUser repository.
 }
 
 func (s *profileService) CreateProfile(userId string, email string, reqProfile dto.ReqProfile) error {
-	exist, err := s.repoProfile.GetProfileByAccountId(userId)
-	if err != nil {
-		return err
-	}
-	if exist.Id != "" {
+	_, err := s.repoProfile.GetProfileByAccountId(userId)
+	if err == nil {
 		return errors.New("profile already exist")
 	}
 
-	if exist.PhotoProfile != "" {
-
+	if err != nil && err.Error() != "profile not found" {
+		return err
 	}
+
+	
 
 	profile := model.Profile{
 		Id:           uuid.New().String(),

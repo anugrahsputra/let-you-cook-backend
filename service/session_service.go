@@ -139,6 +139,10 @@ func applySessionPatch(session *model.PomodoroSession, payload dto.ReqPatchSessi
 		session.Status = *payload.Status
 	}
 
+	if payload.TaskId != nil {
+		session.TaskId = *payload.TaskId
+	}
+
 	if payload.StartTime != nil {
 		session.StartTime = *payload.StartTime
 	}

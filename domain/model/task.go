@@ -20,6 +20,7 @@ type Task struct {
 
 func (t *Task) ToDTO() dto.TaskResp {
 	return dto.TaskResp{
+		Id:          t.Id,
 		Title:       t.Title,
 		Description: t.Description,
 		CategoryId:  t.CategoryId,
