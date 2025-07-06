@@ -111,6 +111,36 @@ func (h *ProfileHandler) UploadProfilePicture(c *gin.Context) {
 		return
 	}
 
+	// Check MIME type
+	src, err := file.Open()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "failed to open file",
+		})
+		return
+	}
+	defer src.Close()
+
+	buffer := make([]byte, 512)
+	_, err = src.Read(buffer)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Status:  http.StatusInternalServerError,
+			Message: "failed to read file",
+		})
+		return
+	}
+
+	contentType := http.DetectContentType(buffer)
+	if contentType != "image/jpeg" && contentType != "image/png" {
+		c.JSON(http.StatusUnsupportedMediaType, dto.ErrorResponse{
+			Status:  http.StatusUnsupportedMediaType,
+			Message: "unsupported file type. only jpeg and png are allowed",
+		})
+		return
+	}
+
 	profile, err := h.profileService.UploadProfilePicture(userID, file)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{

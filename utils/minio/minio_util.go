@@ -16,6 +16,13 @@ import (
 
 var minioClient *minio.Client
 
+var imageExtensions = map[string]bool{
+	".jpg":  true,
+	".jpeg": true,
+	".png":  true,
+	".gif":  true,
+}
+
 // InitMinio initializes the MinIO client
 func InitMinio() error {
 	var err error
@@ -140,7 +147,10 @@ func UploadPhoto(file *multipart.FileHeader) (string, error) {
 	defer src.Close()
 
 	// Generate a unique object name
-	extension := filepath.Ext(file.Filename)
+	extension := strings.ToLower(filepath.Ext(file.Filename))
+	if !imageExtensions[extension] {
+		return "", fmt.Errorf("file %s is not an image", extension)
+	}
 	objectName := fmt.Sprintf("%s-%d%s", uuid.New().String(), time.Now().Unix(), extension)
 
 	// Upload the file
@@ -154,3 +164,4 @@ func UploadPhoto(file *multipart.FileHeader) (string, error) {
 
 	return url, nil
 }
+
